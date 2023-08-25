@@ -75,7 +75,7 @@ export const professions = [
     // "Trapper"
 
 const weighted = {
-    alignment:["Lawful Good","Neutral Good","Chaotic Good","Lawful Neutral","True Neutral"],
+    // alignment:["Lawful Good","Neutral Good","Chaotic Good","Lawful Neutral","True Neutral"],
     visualFeature:["Heterochromia","Goiter","Rickets","Missing fingers","Birthmark","Beautiful","Burn mark","Freckles","Short","Tall","Frail","Stout","Dimples","Scars","Unkempt","Callouses"]
     };
     
@@ -114,7 +114,7 @@ const weighted = {
       const hair = getWeightValued(hairArr);
       results.name = getName(gender);
       results.age = age;
-      results.genderExpression = getGenderType(gender);
+    //   results.genderExpression = getGenderType(gender);
       results.hair = hair;
       getWeighted();
       getNormal();
@@ -155,7 +155,7 @@ const weighted = {
           }
         }
         string += '</details>';
-        const node = document.createElement('div');
+        const node = document.createElement('span');
         node.innerHTML = string;
         return node;
     }
