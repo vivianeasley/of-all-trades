@@ -40,8 +40,8 @@ const wildAnimalNoises = ["Deer says EEuurrruu","Owl says hooo","Rat says squeak
 
 const storyNode = document.querySelector("#story");
 const svg = document.querySelector("svg");
-const qaudrant = [10, 10] // x, y
-const player = [50, 50]; // x, y
+const qaudrant = [8, 8] // x, y
+const player = [100, 100]; // x, y
 let city; // x, y
 const emojiIcons = ['🧕','🌲','🌳', '🛖','🏚️','⛪', '🏛️', '🏯', '🏰', '👶', '🧒', '🧓', '🧑‍🦱', '🧑‍🦰', '🧑‍🦳', '🧑', '👵', '👩‍🦱', '👩‍🦰', '👩‍🦳', '👱‍♀️', '👴', '👨‍🦱', '👨‍🦰', '👨‍🦳', '🧔', '🐓', '🐖', '🐂', '🐏', '🦌', '🦉', '🐀', '🦇', '🪨', '🛸', '🪵','⛲','🦑','🧜‍♂️','✨']
 const images = [];
@@ -80,16 +80,14 @@ const keys = {
   'e': ()=>movePlayer(-1, 0), // NW
 }
 
-const actions = {
-
-}
-
 // TODO: make this work
 const getData = () => qauds[qaudrant[1]]?.[qaudrant[0]]?.data;
 
 //TODO DRY UP!
 function movePlayer (x, y) {
   const data = getData();
+  const biomePlacementArr = ["forest", "plains"];
+  if (apprenticeIndex < 17) biomePlacementArr.push('water');
 
   // Off bottom
   if (!data[player[1]+y]?.[player[0]+x]) {
@@ -101,7 +99,9 @@ function movePlayer (x, y) {
       if (typeof nextQuad[0] === 'number') {
         renderInitial(); // TODO: will maybe need await
       } else {
-        // TODO: player must end up in plains or forest
+        const updatedCoords = findNearest(player[0], player[1], biomePlacementArr);
+        player[0] = updatedCoords[0];
+        player[1] = updatedCoords[1];
         render();
       }
       return;
@@ -114,7 +114,9 @@ function movePlayer (x, y) {
       if (typeof nextQuad[0] === 'number') {
         renderInitial(); // TODO: will maybe need await
       } else {
-        // TODO: player must end up in plains or forest
+        const updatedCoords = findNearest(player[0], player[1], biomePlacementArr);
+        player[0] = updatedCoords[0];
+        player[1] = updatedCoords[1];
         render();
       }
       return;
@@ -128,7 +130,9 @@ function movePlayer (x, y) {
       if (typeof nextQuad[0] === 'number') {
         renderInitial(); // TODO: will maybe need await
       } else {
-        // TODO: player must end up in plains or forest
+        const updatedCoords = findNearest(player[0], player[1], biomePlacementArr);
+        player[0] = updatedCoords[0];
+        player[1] = updatedCoords[1];
         render();
       }
       return;
@@ -141,7 +145,9 @@ function movePlayer (x, y) {
       if (typeof nextQuad[0] === 'number') {
         renderInitial(); // TODO: will maybe need await
       } else {
-        // TODO: player must end up in plains or forest
+        const updatedCoords = findNearest(player[0], player[1], biomePlacementArr);
+        player[0] = updatedCoords[0];
+        player[1] = updatedCoords[1];
         render();
       }
       return;
@@ -150,7 +156,6 @@ function movePlayer (x, y) {
 
 
   const biome = getBiome(data[player[1]+y][player[0]+x].elevation);
-
   if (biome === "mountain" && apprenticeIndex < 8) {
     storyNode.textContent = "You need to have apprenticed with a ropemaker to ascend mountains.";
     return;
@@ -225,24 +230,24 @@ function createQaudrants () {
   let townCount = 0; // max 5
 
   const qaudrants = [];
-  for (let y = 0; y < 11; y++) {
+  for (let y = 0; y < 15; y++) {
     qaudrants.push([]);
-    for (let x = 0; x < 11; x++) {
+    for (let x = 0; x < 15; x++) {
       qaudrants[y].push([]);
       const rand = Math.random();
-      if (cityCount < 1 && y > 1 && rand > .95) {
+      if (cityCount < 1 && y > 1 && rand > 0.95) {
         // place city
         city = [x, y];
         qaudrants[y][x].push(5);
         cityCount++;
       }
-      if (townCount < 5 && rand > .99) {
+      if (townCount < 5 && rand > 0.7) {
         // place town
         qaudrants[y][x].push(4);
         townCount++;
       }
       // place Village
-      if (Math.random() > 0.8) qaudrants[y][x].push(3);
+      if (Math.random() > 0.5) qaudrants[y][x].push(3);
       for (let structures = 0; structures < 10; structures++) {
         // place Farm
         if (Math.random() > 0.7) qaudrants[y][x].push(2);
@@ -297,11 +302,11 @@ async function populateEntities () {
       const target = getPlacement(id, targetY, targetX);
       qauds[qaudrant[1]][qaudrant[0]].locs.push([target[0], target[1]])
       data[target[1]][target[0]].structure = {
-        type: types[id],
-        imageId: getRandomIntInclusive(0, id+1) + 2
+        type: types[id - 1],
+        imageId: getRandomIntInclusive(0, id-1) + 2
       }
       // place characters around structures
-      for (let charIndex = 0; charIndex < getRandomIntInclusive(1,4); charIndex++) {
+      for (let charIndex = 0; charIndex < getRandomIntInclusive(1,1+id); charIndex++) {
         let charTargetX = targetX + getRandomIntInclusive(-2, 2);
         let charTargetY = targetY + getRandomIntInclusive(-2, 2);
         if (charTargetX === targetX) charTargetX += 1;
@@ -414,7 +419,7 @@ function render () {
   storyNode.innerHTML = '';
 
   if (!start) {
-    string += "You set out on your journey to apprentice your way to the top! Start by finding a Peddler to apprentice under.";
+    string += "You set out on your journey to apprentice your way to the top! Start by finding a Peddler to apprentice under then a hunter, and so on.";
     start = true;
   }
 
