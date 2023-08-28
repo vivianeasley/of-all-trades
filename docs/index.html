@@ -4,7 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Of All Trades</title>
-    <script type="module" crossorigin src="/of-all-trades/assets/index-c112c364.js"></script>
+    <script type="module" crossorigin src="/of-all-trades/assets/index-2e1020c7.js"></script>
   </head>
   <body>
     <style>
@@ -25,10 +25,6 @@
       .hidden {
         display: none;
       }
-      #controls {
-        max-width: 350px;
-        margin: 0 auto;
-      }
       .border {
         border: 2px solid grey;
         padding: 6px 8px;
@@ -38,20 +34,57 @@
       li > span {
         display: inline-block;
       }
+      rect {
+        opacity: 0;
+      }
+      rect:hover {
+        fill: #f1f1f1;
+        opacity: 0.2;
+        cursor: pointer;
+      }
+      .stars {
+        position: absolute;
+        animation-name: topFadeOut;
+        animation-duration: 3s;
+      }
+      @keyframes topFadeOut {
+        0% {
+          position: absolute;
+          transform: translateY(0px);
+          opacity: 1;
+        }
+
+        100% {
+          position: absolute;
+          transform: translateY(-300px);
+          opacity: 0;
+        }
+      }
     </style>
-    <div style="text-align: center;">
-      <svg width="700" height="350" viewBox="0 0 700 350" style="width:100%; max-width:350px; margin: 0 auto" xmlns="http://www.w3.org/2000/svg">
+    <div style="max-width: 350px; margin: 0 auto; position: relative;">
+      <svg width="700" height="275" viewBox="0 0 700 350" style="width:100%; max-width:350px; margin: 0 auto" xmlns="http://www.w3.org/2000/svg">
+        <g id="game"></g>
+        <g id="ui">
+          <rect data-d="nw" width="233" height="124" x="0" y="0" />
+          <rect data-d="n" width="233" height="124" x="233" y="0" />
+          <rect data-d="ne" width="233" height="124" x="466" y="0" />
+          <rect data-d="w" width="350" height="124" x="0" y="124" />
+          <rect data-d="e" width="350" height="124" x="350" y="124" />
+          <rect data-d="sw" width="233" height="124" x="0" y="248" />
+          <rect data-d="s" width="233" height="124" x="233" y="248" />
+          <rect data-d="se" width="233" height="124" x="466" y="248" />
+        </g>
       </svg>
-    </div>
-    <div id="controls">
-      <div id="story" class="border">
-        
+      <div style="overflow-y: auto;overflow-x: hidden;">
+        <div id="story" class="border">Loading...
+        </div>
+        <div class="border">
+          <div>Apprenticed List</div>
+          <ol style="list-style-position: inside;"></ol>
+        </div>
       </div>
-      <div class="border">
-        <div>Apprenticed List</div>
-        <ol style="list-style-position: inside;"></ol>
-      </div>
     </div>
+
     <div id="character"></div>
     <canvas class="hidden" id="perlin"></canvas>
     <canvas class="hidden" id="start"></canvas>

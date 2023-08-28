@@ -107,12 +107,12 @@ const weighted = {
     
     let results = {};
     
-    export function createCharacter () {
+    export async function createCharacter () {
       results = {};
       const gender = Math.random();
       const age = getRandomIntInclusive(1, 10) + getRandomIntInclusive(1, 10) + getRandomIntInclusive(1, 10) + getRandomIntInclusive(1, 10);
-      const hair = getWeightValued(hairArr);
-      results.name = getName(gender);
+      const hair = await getWeightValued(hairArr);
+      results.name = await getName(gender);
       results.age = age;
     //   results.genderExpression = getGenderType(gender);
       results.hair = hair;
@@ -160,23 +160,26 @@ const weighted = {
         return node;
     }
 
-    function getGenderType (value) {
-        if (value <=.05) return "Very femenine";
-        if (value > .05 && value <=.40) return "Femenine";
-        if (value > .40 && value <=.60) return "Nuetral";
-        if (value > .60 && value <=.95) return "Masculine";
-        return 'Very masculine';
-    }
+    // function getGenderType (value) {
+    //     if (value <=.05) return "Very femenine";
+    //     if (value > .05 && value <=.40) return "Femenine";
+    //     if (value > .40 && value <=.60) return "Nuetral";
+    //     if (value > .60 && value <=.95) return "Masculine";
+    //     return 'Very masculine';
+    // }
     
     function getName (gender) {
-      const lastName = last[Math.floor(Math.random()*last.length)]
-      if (gender <= 0.5) {
-        return `${female[Math.floor(Math.random()*female.length)]} ${lastName}`;
-    
-      } else {
-        return `${male[Math.floor(Math.random()*male.length)]} ${lastName}`;
-        
-      }
+      return new Promise((resolve)=>{
+        const lastName = last[Math.floor(Math.random()*last.length)]
+        if (gender <= 0.5) {
+          resolve(`${female[Math.floor(Math.random()*female.length)]} ${lastName}`);
+      
+        } else {
+          resolve(`${male[Math.floor(Math.random()*male.length)]} ${lastName}`);
+          
+        }
+      })
+
     }
     
     
@@ -187,18 +190,21 @@ const weighted = {
       return results;
     }
     
-    function getWeighted () {
+    async function getWeighted () {
       for (const key in weighted) {
-        results[key] = getWeightValued(weighted[key])
+        results[key] = await getWeightValued(weighted[key])
       }
       return results;
     }
     
     function getWeightValued (arr) {
-      const bellArr = [...arr, ...arr.reverse()];
-      const diceNum = Math.ceil(bellArr.length/2);
-      const roll = getRandomIntInclusive(0, diceNum) + getRandomIntInclusive(0, diceNum);
-      return bellArr[roll] ? bellArr[roll] : bellArr[bellArr.length - 1]
+      return new Promise((resolve)=>{
+        const bellArr = [...arr, ...arr.reverse()];
+        const diceNum = Math.ceil(bellArr.length/2);
+        const roll = getRandomIntInclusive(0, diceNum) + getRandomIntInclusive(0, diceNum);
+        resolve(bellArr[roll] ? bellArr[roll] : bellArr[bellArr.length - 1])
+      })
+
     }
       
     export function getRandomIntInclusive(min, max) {

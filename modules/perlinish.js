@@ -3,7 +3,7 @@ export const perlinish = (canvasNode)=>{
     const shapes = ['▮','▬','▰','▲','▴','▶','▸','►','▼','▾','◀','◂','◄','◆','◖','◗','◢','◣','◤','◥','◼'];
     const ctx = canvasNode.getContext("2d", { willReadFrequently: true });
 
-    PE.generate = ()=>{
+    PE.generate = async ()=>{
         const arr = [];
         const width = 200;
         const height = 200;
@@ -23,7 +23,7 @@ export const perlinish = (canvasNode)=>{
         let y = 0;
         while (x <= width &&
         y < height) {
-            const colorData = ctx.getImageData(x, y, 1, 1).data;
+            const colorData = await getColorData(x, y);
             if (!arr[y]) arr[y] = [];
             arr[y].push(colorData[3]);
             x++;
@@ -33,6 +33,12 @@ export const perlinish = (canvasNode)=>{
             }
         }
         return arr;
+    }
+
+    function getColorData (x, y) {
+        return new Promise((resolve)=>{
+            resolve(ctx.getImageData(x, y, 1, 1).data);
+        })
     }
 
     return PE;

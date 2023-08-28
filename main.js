@@ -1,49 +1,20 @@
 import {getImage} from "./modules/pixelate";
 import {perlinish} from "./modules/perlinish";
-import {setUpKeys} from "./modules/key";
+import {specialsText} from "/modules/specials";
 import {createCharacter, getRandomIntInclusive, professions, generateStringHtml} from "./modules/character";
 import {last} from "./modules/names";
 
 
-/////////////// Wed
+const farmAnimalNoises = ["Chicken says cluck", "Pig says oink", "Cow says mooo", "Sheep says baaa", "Dog barks", "Goat gives a funny look and screams", "Horse whinnys"];
+const wildAnimalNoises = ["Deer says EEuurrruu","Owl says hooo","Rat says squeak","Bat says chirp","Rabbit runs off and hides in the underbrush", "Wild dog yaps and barks"];
 
-// build 2d array of qaudrants with number of home steads, villages, etc
-// place when generating a qaudrant along with buildings and characters 
-// make sure you place on plains or forest
-// make when you go to next qaudrant generate
-
-// setup tabbed screen
-//// you can apprentice with various people
-
-
-//// make homesteads, farms, villages, towns, cities
-//// choose area 4x4, 8x8, 12x12, 18x18, 30x30 place buildings accordingly
-// homestead 1 hut
-// farm 1-2 hut or house
-// 3-5 hut or house
-// 6-10 hut or house and one manor ⛪
-// 11-20 hut or house or manor and one castle fountain, etc ⛪ 🏛️
-
-////////////////Wed
-
-// extra credit:
-// make cubes
-// add story
-// (fast travel to characters)
-// show coordinates
-// add animals
-// add standing stones
-// add special
-const farmAnimalNoises = ["Chicken says cluck", "Pig says oink", "Cow says mooo", "Sheep says baaa"];
-const wildAnimalNoises = ["Deer says EEuurrruu","Owl says hooo","Rat says squeak","Bat says chirp"];
-// const settlements = ["Homestead", "Farm", "Village", "Town", "City"]
-
+let firstQaud = true;
 const storyNode = document.querySelector("#story");
-const svg = document.querySelector("svg");
+const svg = document.querySelector("#game");
 const qaudrant = [8, 8] // x, y
 const player = [100, 100]; // x, y
 let city; // x, y
-const emojiIcons = ['🧕','🌲','🌳', '🛖','🏚️','⛪', '🏛️', '🏯', '🏰', '👶', '🧒', '🧓', '🧑‍🦱', '🧑‍🦰', '🧑‍🦳', '🧑', '👵', '👩‍🦱', '👩‍🦰', '👩‍🦳', '👱‍♀️', '👴', '👨‍🦱', '👨‍🦰', '👨‍🦳', '🧔', '🐓', '🐖', '🐂', '🐏', '🦌', '🦉', '🐀', '🦇', '🪨', '🛸', '🪵','⛲','🦑','🧜‍♂️','✨']
+const emojiIcons = ['🧕','🌲','🌳', '🛖','🏚️','⛪', '🏛️', '🏯', '🏰', '👶', '🧒', '🧓', '🧑‍🦱', '🧑‍🦰', '🧑‍🦳', '🧑', '👵', '👩‍🦱', '👩‍🦰', '👩‍🦳', '👱‍♀️', '👴', '👨‍🦱', '👨‍🦰', '👨‍🦳', '🧔', '🐓', '🐖', '🐂', '🐏','🐕','🐐','🐎','🦌', '🦉','🐀', '🦇','🐇','🐕','🪨', '🪵','⛲','🌳','📜','✨','🗝️','🕯️','🌈','🌺','🍄','🐚','💀','💎','🔔','🔮','🗿','🍋','🧜‍♂️','🛸']
 const images = [];
 let apprenticeIndex = 0;
 const apprenticesArr = professions.flat();
@@ -59,7 +30,7 @@ const qauds = createQaudrants();
 const canvasNode = document.querySelector('#perlin');
 const noise = perlinish(canvasNode);
 let structuresArr;
-const dataTrees = noise.generate();
+let dataTrees;
 
 const biomeColors = {
   'water': '#00445a',
@@ -70,17 +41,17 @@ const biomeColors = {
 }
 
 const keys = {
-  'w': ()=>movePlayer(-1, -1), // N-
-  'd': ()=>movePlayer(-1, 1), // E-
-  'a': ()=>movePlayer(1, -1), // S-
-  's': ()=>movePlayer(1, 1), // W-
-  'q': ()=>movePlayer(0, -1), // NE
-  'z': ()=>movePlayer(1, 0), // SE
-  'x': ()=>movePlayer(0, 1), // SW
-  'e': ()=>movePlayer(-1, 0), // NW
+  'n': ()=>movePlayer(-1, -1), // N-
+  'e': ()=>movePlayer(-1, 1), // E-
+  'w': ()=>movePlayer(1, -1), // w-
+  's': ()=>movePlayer(1, 1), // s-
+  'nw': ()=>movePlayer(0, -1), // NW
+  'sw': ()=>movePlayer(1, 0), // SW
+  'se': ()=>movePlayer(0, 1), // SE
+  'ne': ()=>movePlayer(-1, 0), // NE
 }
+document.querySelector("#ui").addEventListener('click', (e)=>{if (keys[e.target.dataset.d]) keys[e.target.dataset.d]()}, true)
 
-// TODO: make this work
 const getData = () => qauds[qaudrant[1]]?.[qaudrant[0]]?.data;
 
 //TODO DRY UP!
@@ -90,70 +61,20 @@ function movePlayer (x, y) {
   if (apprenticeIndex < 17) biomePlacementArr.push('water');
 
   // Off bottom
-  if (!data[player[1]+y]?.[player[0]+x]) {
-    if (player[1] >= 199) {
-      if (!qauds[qaudrant[1]+1]?.[qaudrant[0]]) return; // TODO: you found the edge of the world
-      qaudrant[1] = qaudrant[1]+1;
-      let nextQuad = qauds[qaudrant[1]]?.[qaudrant[0]];
-      player[1] = 0;
-      if (typeof nextQuad[0] === 'number') {
-        renderInitial(); // TODO: will maybe need await
-      } else {
-        const updatedCoords = findNearest(player[0], player[1], biomePlacementArr);
-        player[0] = updatedCoords[0];
-        player[1] = updatedCoords[1];
-        render();
-      }
-      return;
-    }
-    // off top
-    if (player[1] <= 0) {
-      if (!qauds[qaudrant[1]-1]?.[qaudrant[0]]) return; // TODO: you found the edge of the world
-      let nextQuad = qauds[qaudrant[1]]?.[qaudrant[0]];
-      player[1] = 199;
-      if (typeof nextQuad[0] === 'number') {
-        renderInitial(); // TODO: will maybe need await
-      } else {
-        const updatedCoords = findNearest(player[0], player[1], biomePlacementArr);
-        player[0] = updatedCoords[0];
-        player[1] = updatedCoords[1];
-        render();
-      }
-      return;
-    };
-    // off right
-    if (player[0] >= 199) {
-      if (!qauds[qaudrant[1]]?.[qaudrant[0]+1]) return; // TODO: you found the edge of the world
-      qaudrant[0] = qaudrant[0]+1;
-      let nextQuad = qauds[qaudrant[1]]?.[qaudrant[0]];
-      player[0] = 0;
-      if (typeof nextQuad[0] === 'number') {
-        renderInitial(); // TODO: will maybe need await
-      } else {
-        const updatedCoords = findNearest(player[0], player[1], biomePlacementArr);
-        player[0] = updatedCoords[0];
-        player[1] = updatedCoords[1];
-        render();
-      }
-      return;
-    };
-    if (player[0] <= 0) {
-      if (!qauds[qaudrant[1]]?.[qaudrant[0]-1]) return; // TODO: you found the edge of the world
-      qaudrant[0] = qaudrant[0]-1;
-      let nextQuad = qauds[qaudrant[1]]?.[qaudrant[0]];
-      player[0] = 199;
-      if (typeof nextQuad[0] === 'number') {
-        renderInitial(); // TODO: will maybe need await
-      } else {
-        const updatedCoords = findNearest(player[0], player[1], biomePlacementArr);
-        player[0] = updatedCoords[0];
-        player[1] = updatedCoords[1];
-        render();
-      }
-      return;
-    };
+  if (player[1] >= 199) {
+    manageDirection (0, 1);
   }
-
+  // off top
+  if (player[1] <= 0) {
+    manageDirection (0, -1);
+  };
+  // off right
+  if (player[0] >= 199) {
+    manageDirection (1, 0);
+  };
+  if (player[0] <= 0) {
+    manageDirection (-1, 0);
+  };
 
   const biome = getBiome(data[player[1]+y][player[0]+x].elevation);
   if (biome === "mountain" && apprenticeIndex < 8) {
@@ -180,13 +101,44 @@ function movePlayer (x, y) {
     const node = generateStringHtml(person.data, person.profession, images);
     apprNodes[apprenticeIndex].textContent = '';
     apprNodes[apprenticeIndex].appendChild(node);
+    createStars(3+apprenticeIndex);
     apprenticeIndex++
   }
 
   render();
-}
 
-setUpKeys(keys);
+  async function manageDirection (x, y) {
+    if (!qauds[qaudrant[1]+y]?.[qaudrant[0]+x]) {
+      storyNode.textContent("You've reached the edge of this land. You can travel no further in this direction.")
+      return;
+    };
+    if (y !== 0) {
+      qaudrant[1] = qaudrant[1]+y;
+      if (player[1] >= 199) {
+        player[1] = 0;
+      } else {
+        player[1] = 199;
+      }
+    }
+    if (x !== 0) {
+      qaudrant[0] = qaudrant[0]+x;
+      if (player[0] >= 199) {
+        player[0] = 0;
+      } else {
+        player[0] = 199;
+      }
+    }
+    const nextQuad = qauds[qaudrant[1]]?.[qaudrant[0]];
+    if (typeof nextQuad[0] === 'number') {
+      renderInitial();
+    } else {
+      const updatedCoords = await findNearest(player[0], player[1], biomePlacementArr);
+      player[0] = updatedCoords[0];
+      player[1] = updatedCoords[1];
+      render();
+    }
+  }
+}
 
 setTimeout(async () => {
   await generateImages();
@@ -195,34 +147,40 @@ setTimeout(async () => {
 
 async function renderInitial () {
   structuresArr = [...qauds[qaudrant[1]][qaudrant[0]]];
+  dataTrees = await noise.generate();
+  const tileData = await noise.generate();
   qauds[qaudrant[1]][qaudrant[0]] = {
     name: last[qaudrant[1] + qaudrant[0]],
     locs: [],
-    data: noise.generate(),
+    data: tileData,
   } 
   await defineTile();
-  const updatedCoords = findNearest(player[0], player[1], ["forest", "plains"]);
+  const updatedCoords = await findNearest(player[0], player[1], ["forest", "plains"]);
   player[0] = updatedCoords[0];
   player[1] = updatedCoords[1];
-  populateEntities();
+  await populateEntities();
   render();
 }
 
 function findNearest (x, y, biomes) {
-  const data = getData();
-  let count = 1;
-  let index = 0;
-  const arr = [[-1, 1], [1, -1], [1, 1], [-1, -1], [0, 1], [-1, 0], [0, -1], [1, 0],];
-  while (count < 49) {
-    if (!arr[index]) index = 0;
-    const updatedY = y+(count*arr[index][0]);
-    const updatedX = x+(count*arr[index][1]);
-    const tileData = data[updatedY] ? data[updatedY][updatedX] : undefined;
-
-    if (tileData && biomes.includes(tileData.biome)) return [updatedX, updatedY];
-    count++;
-    index++;
-  }
+  return new Promise(
+    (resolve)=> {
+      const data = getData();
+      let count = 1;
+      let index = 0;
+      const arr = [[-1, 1], [1, -1], [1, 1], [-1, -1], [0, 1], [-1, 0], [0, -1], [1, 0],];
+      while (count < 49) {
+        if (!arr[index]) index = 0;
+        const updatedY = y+(count*arr[index][0]);
+        const updatedX = x+(count*arr[index][1]);
+        const tileData = data[updatedY] ? data[updatedY][updatedX] : undefined;
+    
+        if (tileData && biomes.includes(tileData.biome)) resolve([updatedX, updatedY]);
+        count++;
+        index++;
+      }
+    }
+  )
 }
 
 function createQaudrants () {
@@ -284,22 +242,21 @@ async function defineTile () {
 }
 
 async function populateEntities () {
-  // loop through arr place structures then people around structures
-  // place 1-3 wanderers
   const types = ["Homestead", "Farm", "Village", "Town", "City"];
   const data = getData();
+  // Race condition here
   for (let typeIndex = 0; typeIndex < structuresArr.length; typeIndex++) {
     const id = structuresArr[typeIndex];
-    let y = getRandomIntInclusive(0, data?.length ?? 20);
-    let x = getRandomIntInclusive(0, data[y]?.length ?? 20);
-    const center = getPlacement(id, x, y);
+    let y = getRandomIntInclusive(0, data?.length);
+    let x = getRandomIntInclusive(0, data[y]?.length);
+    const center = await getPlacement(id, x, y);
     // Place structures
     for (let structIndex = 0; structIndex < 6 - id; structIndex++) {
       let targetX = center[0];
       let targetY = center[1];
       targetX = targetX + (structIndex * getRandomIntInclusive(-2, 2));
       targetY = targetY + (structIndex * getRandomIntInclusive(-2, 2));
-      const target = getPlacement(id, targetY, targetX);
+      const target = await getPlacement(id, targetY, targetX);
       qauds[qaudrant[1]][qaudrant[0]].locs.push([target[0], target[1]])
       data[target[1]][target[0]].structure = {
         type: types[id - 1],
@@ -313,8 +270,8 @@ async function populateEntities () {
         if (charTargetY === targetY) charTargetY += 1;
         charTargetX = charTargetX;
         charTargetY = charTargetY;
-        const charTarget = getPlacement(id, charTargetY, charTargetX);
-        const charData = createCharacter();
+        const charTarget = await getPlacement(id, charTargetY, charTargetX);
+        const charData = await createCharacter();
         const profs = professions[id-1];
         let profession = profs[Math.floor(Math.random() * profs.length)]
         if (charData.age < 20) profession = profession;
@@ -326,7 +283,7 @@ async function populateEntities () {
           profession
         }
         if (id === 1 || id === 2 && Math.random() > 0.3) {
-          const num = getRandomIntInclusive(0, 3);
+          const num = getRandomIntInclusive(0, 6);
           const randNumY = getRandomIntInclusive(-1, 1);
           const randNumX = getRandomIntInclusive(-1, 1);
           const position = data[charTarget[1]+randNumY]?.[charTarget[0]+randNumX];
@@ -339,23 +296,22 @@ async function populateEntities () {
       }
     }
   }
-
-  for (let randoIndex = 0; randoIndex < getRandomIntInclusive(80, 100); randoIndex++) {
-    let y = getRandomIntInclusive(0, data?.length ?? 20);
-    let x = getRandomIntInclusive(0, data[y]?.length ?? 20);
-    
+  // TODO: This causes a race condition if set too high. I think it wa sthe create character function
+  for (let randoIndex = 0; randoIndex < 20; randoIndex++) {
+    let y = getRandomIntInclusive(0, 199);
+    let x = getRandomIntInclusive(0, 199);
 
     if (Math.random() > 0.3) {
-      const randoTarget = getPlacement(6, x, y);
-      const randoNum = getRandomIntInclusive(0, 3);
+      const randoTarget = await getPlacement(6, x, y);
+      const randoNum = getRandomIntInclusive(0, 5);
       data[randoTarget[1]][randoTarget[0]].animal = {
         id: randoNum,
-        imageId: 30 + randoNum,
+        imageId: 33 + randoNum,
         story: wildAnimalNoises[randoNum]
       }
     } else {
-      const randoTarget = getPlacement(7, x, y);
-      const randoData = createCharacter();
+      const randoTarget = await getPlacement(7, x, y);
+      const randoData = await createCharacter();
       const randoProf = apprenticesArr[Math.floor(Math.random() * apprenticesArr.length)];
       data[randoTarget[1]][randoTarget[0]].person = {
         data: randoData,
@@ -363,17 +319,39 @@ async function populateEntities () {
         profession: randoProf,
         isWander: true,
       }
+
     }
+  }
+  for (let specialIndex = 0; specialIndex < getRandomIntInclusive(2, 4); specialIndex++) {
+    let specialY = getRandomIntInclusive(0, 199);
+    let specialX = getRandomIntInclusive(0, 199);
+    const specialTarget = await getPlacement(7, specialX, specialY);
+    const specialNum = getRandomIntInclusive(0, 17);
+    data[specialTarget[1]][specialTarget[0]].special = {
+      id: specialNum,
+      imageId: 39 + specialNum,
+      story: specialsText[specialNum]
+    }
+  }
+  let helperY = getRandomIntInclusive(101, 102);
+  let helperX = getRandomIntInclusive(101, 102);
+  const helperTarget = await getPlacement(1, helperX, helperY);
+  const helperData = await createCharacter();
+  data[helperTarget[1]][helperTarget[0]].person = {
+    data: helperData,
+    imageId: helperData.imageId,
+    profession: "Peddler",
+    isWander: true,
   }
 
   // Place specials including UFO and mermaids
+}
 
-  function getPlacement (num, y, x) {
-    let type = num === 4 || num === 5 ? ["plains"] :  ["forest", "plains"];
-    if (num === 6) type = ["forest", "plains", "mountain", "water"];
-    if (num === 7) type = ["forest", "plains", "mountain", "snow"];
-    return findNearest(x, y, type);
-  }
+async function getPlacement (num, y, x) {
+  let type = num === 4 || num === 5 ? ["plains"] :  ["forest", "plains"];
+  if (num === 6) type = ["forest", "plains", "mountain", "water"];
+  if (num === 7) type = ["forest", "plains", "mountain", "snow"];
+  return await findNearest(x, y, type);
 }
 
 function createEntity (elValue, yIndex, xIndex) {
@@ -431,9 +409,26 @@ function render () {
     string += `${locData.animal.story}. `;
   }
 
+  if (locData.special) {
+    string += `${locData.special.story} `;
+  }
+
   let personNode;
   if (locData.person) {
-    string += `You meet a ${locData.person.profession} named ${locData.person.data.name}. `;
+    let meetString;
+    if (locData.person.isWander) {
+      meetString = 'Walking out along a small path'
+    } else {
+      meetString = 'As you approach a settlment';
+    }
+
+    string += `${meetString}, you meet a ${locData.person.profession} named ${locData.person.data.name}. `;
+
+    if (apprenticesArr[apprenticeIndex-1] && locData.person?.profession === apprenticesArr[apprenticeIndex-1]) {
+      string += `You apprentice under ${locData.person.data.name}. `
+      // if (apprenticesArr[apprenticeIndex] === 'explorer') tell of coordinates of atlantis // TODO: when eeting mermaid get UFO fiefdom
+    }
+
     if (locData.person.isWander) {
       if (Math.random() > 0.7) string += `They tell you of the largest city in the area. They say it's located in the fiefdom of ${last[city[1] + city[0]]}. `;
       string += `The ${locData.person.profession} shares the location of a settlment in this fiefdom: `;
@@ -476,9 +471,6 @@ function render () {
 
 }
 
-// elevation function lower higher or the same
-
-// Adds svg tiles
 function addElement (points, id, biome, coordinates, pos) {
   const data = getData();
   let gElm = createElement('g');
@@ -498,7 +490,7 @@ function addElement (points, id, biome, coordinates, pos) {
   if (tileData.biome === 'water') diff = diff*0.5;
   if (tileData.biome === 'mountain') diff = diff*2;
   if (tileData.biome === 'snow') diff = diff*2.5;
-  gElm.setAttribute("transform", `translate(0, ${diff})`) // TODO: if water none, if mountain *2
+  gElm.setAttribute("transform", `translate(0, ${diff})`);
   gElm.setAttribute("opacity", 1 - (diff*0.015))
 
   svg.appendChild(gElm);
@@ -519,6 +511,10 @@ function addElement (points, id, biome, coordinates, pos) {
     addImage(images[tileData.person.imageId]);
   }
 
+  if (tileData.special) {
+    addImage(images[tileData.special.imageId]);
+  }
+
   if (id === player.join("-")) {
     addImage(images[0], 'player');
   }
@@ -534,7 +530,7 @@ function addElement (points, id, biome, coordinates, pos) {
   function addImage (image, className) {
     const img = createElement('image');
     img.setAttribute('href', image);
-    img.setAttribute('width', 100); // TODO: sizes tree large, buildings medium, people small
+    img.setAttribute('width', 100);
     img.setAttribute('height', 100);
     img.classList.add("tile");
     if (className) img.classList.add(className);
@@ -544,6 +540,25 @@ function addElement (points, id, biome, coordinates, pos) {
     img.setAttribute("opacity", 1 - (diff*0.01))
     svg.appendChild(img);
   }
+}
+
+function createStars (num) {
+  const starsArr = [];
+  for (let starIndex = 0; starIndex < num; starIndex++) {
+    const star = document.createElement('img');
+    star.src = images[44];
+    star.style.top = getRandomIntInclusive(10, 20)+ '%';
+    star.style.left = getRandomIntInclusive(10, 90)+ '%';
+    star.classList.add("stars");
+    starsArr.push(star);
+    document.body.appendChild(star)
+  }
+
+  setTimeout(() => {
+    for (let oldStarsIndex = 0; oldStarsIndex < starsArr.length; oldStarsIndex++) {
+      starsArr[oldStarsIndex].remove();
+    }
+  }, 3000);
 }
 
 async function generateImages () {
