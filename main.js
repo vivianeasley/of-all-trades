@@ -115,7 +115,7 @@ function movePlayer (x, y) {
 
   async function manageDirection (x, y) {
     if (!qauds[qaudrant[1]+y]?.[qaudrant[0]+x]) {
-      storyNode.textContent("You've reached the edge of this land. You can travel no further in this direction.")
+      storyNode.textContent = "You've reached the edge of this land. You can travel no further in this direction.";
       return;
     };
     if (y !== 0) {
