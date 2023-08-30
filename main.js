@@ -389,7 +389,6 @@ function createEntity (elValue, yIndex, xIndex) {
           imageId: 58,
           story: `Hello human. I admire your desire to understand all things. I have an offer for you. Travel with me and I will teach you all you could ever desire to know.`
         }
-        console.log("Alien",[qaudrant, [xIndex, yIndex]])
       }
       if (elValue <= 7 && alienCoords && merfolkCount < 5) {
           merfolkCount++;
@@ -398,7 +397,6 @@ function createEntity (elValue, yIndex, xIndex) {
           imageId: 57,
           story: `Hello human. The kingdom of the merfolk have watched your journeys. We know what you seek lies at ${alienCoords[1].join("-")} in the ${last[qaudrant[1] + qaudrant[0]]} fiefdom. Good luck.`
         }
-        console.log("Merfolk", [qaudrant, [xIndex, yIndex]])
       }
       const biome = getBiome(elValue);
       const tree = getTree(biome, elValue, dataTrees[yIndex][xIndex]);
@@ -463,6 +461,9 @@ function render () {
 
   if (locData.special) {
     string += `${locData.special.story} `;
+    if (locData.special.id === 58) {
+      setVictory();
+    }
   }
 
   let personNode;
@@ -493,7 +494,9 @@ function render () {
   storyNode.textContent = string;
   if (locData?.person?.profession === "lord" && apprenticeIndex >= 24) {
     storyNode.textContent = "The lord offer's you your final apprentiship. You have learned all that this great land has to offer. After years in service to the lord as their most trusted advisor you retire feeling oddly empty inside. Truly there must be more to know...";
+    setVictory();
   }
+
   if (personNode) storyNode.append(personNode);
 
   if (tileNodes.length > 0) {
