@@ -16,5 +16,5 @@ export const specialsText = [
     "The sound of a bell starts gently ringing. It grows closer. You hide. The sound passes close and then fades off into the distance. You saw nothing.",
     "You come a upon an old woman who offers to tell you your future. She says you will never satisfy your insatiable hunger for knowledge unless you can find the ship made of iron.",
     "A giant stone head sits out in the open. Scratched in the back is a map that seems to show a city out in the ocean and creatures half human and half fish.",
-    "You come across a lemon tree. Not today scurvy!"
+    "You come across a lemon tree. Not today scurvy you excliam!"
 ];

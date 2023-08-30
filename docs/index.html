@@ -4,7 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Of All Trades</title>
-    <script type="module" crossorigin src="/of-all-trades/assets/index-2e1020c7.js"></script>
+    <script type="module" crossorigin src="/of-all-trades/assets/index-762f35d0.js"></script>
   </head>
   <body>
     <style>
@@ -86,7 +86,21 @@
     </div>
 
     <div id="character"></div>
-    <canvas class="hidden" id="perlin"></canvas>
+    <canvas class="hidden" id="perlin"
+    width="1000"
+    height="1000"></canvas>
+    <svg
+      class="hidden"
+      id="perlin-svg"
+      width="1000"
+      height="1000"
+      xmlns="http://www.w3.org/2000/svg"
+      xmlns:xlink="http://www.w3.org/1999/xlink">
+      <filter id="blur" filterUnits="objectBoundingBox"
+      x="-30%" y="-30%" width="160%" height="160%">
+        <feGaussianBlur in="SourceGraphic" stdDeviation="10" />
+      </filter>
+    </svg>
     <canvas class="hidden" id="start"></canvas>
     <canvas class="hidden" id="final"></canvas>
     
