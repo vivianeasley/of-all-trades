@@ -57,32 +57,23 @@ document.querySelector("#ui").addEventListener('click', (e)=>{if (keys[e.target.
 const getData = () => qauds[qaudrant[1]]?.[qaudrant[0]]?.data;
 
 //TODO DRY UP!
-function movePlayer (x, y) {
+async function movePlayer (x, y) {
   const data = getData();
   const biomePlacementArr = ["forest", "plains"];
   if (apprenticeIndex < 17) biomePlacementArr.push('water');
+  const newPlayer = [... player];
+  newPlayer[1]+=y;
+  newPlayer[0]+=x;
 
-  // Off bottom
-  if (player[1] >= 199) {
-    manageDirection (0, 1);
+  if (newPlayer[1] >= 199 ||
+    newPlayer[1] <= 0 ||
+    newPlayer[0] >= 199 ||
+    newPlayer[0] <= 0) {
+    await manageDirection ();
     return;
   }
-  // off top
-  if (player[1] <= 0) {
-    manageDirection (0, -1);
-    return;
-  };
-  // off right
-  if (player[0] >= 199) {
-    manageDirection (1, 0);
-    return;
-  };
-  if (player[0] <= 0) {
-    manageDirection (-1, 0);
-    return;
-  };
 
-  const biome = getBiome(data[player[1]+y]?.[player[0]+x]?.elevation);
+  const biome = getBiome(data[newPlayer[1]]?.[newPlayer[0]]?.elevation);
   if (biome === "mountain" && apprenticeIndex < 8) {
     storyNode.textContent = "You need to have apprenticed with a ropemaker to ascend mountains.";
     return;
@@ -98,8 +89,8 @@ function movePlayer (x, y) {
     return;
   }
 
-  player[0] = player[0] + x;
-  player[1] = player[1] + y;
+  player[0] = newPlayer[0];
+  player[1] = newPlayer[1];
 
   const person = data[player[1]]?.[player[0]]?.person
   if (apprenticesArr[apprenticeIndex] && person?.profession === apprenticesArr[apprenticeIndex]) {
@@ -113,14 +104,14 @@ function movePlayer (x, y) {
 
   render();
 
-  async function manageDirection (x, y) {
+  async function manageDirection () {
     if (!qauds[qaudrant[1]+y]?.[qaudrant[0]+x]) {
       storyNode.textContent = "You've reached the edge of this land. You can travel no further in this direction.";
       return;
     };
     if (y !== 0) {
       qaudrant[1] = qaudrant[1]+y;
-      if (player[1] >= 199) {
+      if (newPlayer[1] >= 199) {
         player[1] = 3;
       } else {
         player[1] = 196;
@@ -128,7 +119,7 @@ function movePlayer (x, y) {
     }
     if (x !== 0) {
       qaudrant[0] = qaudrant[0]+x;
-      if (player[0] >= 199) {
+      if (newPlayer[0] >= 199) {
         player[0] = 3;
       } else {
         player[0] = 196;
