@@ -13,7 +13,7 @@ const svg = document.querySelector("#game");
 const qaudrant = [2, 2] // x, y
 const player = [100, 100]; // x, y
 let city; // x, y
-const emojiIcons = ['🧕','🌲','🌳', '🛖','🏚️','⛪', '🏛️', '🏯', '🏰', '👶', '🧒', '🧓', '🧑‍🦱', '🧑‍🦰', '🧑‍🦳', '🧑', '👵', '👩‍🦱', '👩‍🦰', '👩‍🦳', '👱‍♀️', '👴', '👨‍🦱', '👨‍🦰', '👨‍🦳', '🧔', '🐓', '🐖', '🐂', '🐏','🐕','🐐','🐎','🦌', '🦉','🐀', '🦇','🐇','🐕','🪨', '🪵','⛲','🌳','📜','✨','🗝️','🕯️','🌈','🌺','🍄','🐚','💀','💎','🔔','🔮','🗿','🍋','🧜‍♂️','🛸']
+const emojiIcons = ['🧕','🌲','🌳', '🛖','🏚️','⛪', '🏛️', '🏯', '🏰', '👶', '🧒', '🧓', '🧑‍🦱', '🧑‍🦰', '🧑‍🦳', '🧑', '👵', '👩‍🦱', '👩‍🦰', '👩‍🦳', '👱‍♀️', '👴', '👨‍🦱', '👨‍🦰', '👨‍🦳', '🧔', '🐓', '🐖', '🐂', '🐏','🐕','🐐','🐎','🦌', '🦉','🐀', '🦇','🐇','🐕','🪨', '🪵','⛲','🌳','📜','✨','🗝️','🕯️','🌈','🌺','🍄','🐚','💀','💎','🔔','🔮','🗿','🍋','🧜‍♂️','🛸','🏆']
 const images = [];
 let apprenticeIndex = 0;
 const apprenticesArr = professions.flat();
@@ -27,7 +27,6 @@ for (let appIndex = 0; appIndex < apprenticesArr.length; appIndex++) {
 }
 
 const qauds = createQaudrants();
-console.log(qauds)
 
 const canvasNode = document.querySelector('#perlin');
 const noise = perlinish(canvasNode);
@@ -52,6 +51,7 @@ const keys = {
   'se': ()=>movePlayer(0, 1), // SE
   'ne': ()=>movePlayer(-1, 0), // NE
 }
+
 document.querySelector("#ui").addEventListener('click', (e)=>{if (keys[e.target.dataset.d]) keys[e.target.dataset.d]()}, true)
 
 const getData = () => qauds[qaudrant[1]]?.[qaudrant[0]]?.data;
@@ -383,22 +383,22 @@ function createEntity (elValue, yIndex, xIndex) {
   return new Promise((resolve)=>{
       let special;
       if (elValue >= 214 && !alienCoords) {
-        console.log("alien")
           alienCoords = [qaudrant, [xIndex, yIndex]]
           special = {
           id: 58,
           imageId: 58,
           story: `Hello human. I admire your desire to understand all things. I have an offer for you. Travel with me and I will teach you all you could ever desire to know.`
         }
+        console.log("Alien",[qaudrant, [xIndex, yIndex]])
       }
       if (elValue <= 7 && alienCoords && merfolkCount < 5) {
-        console.log("merfolk")
           merfolkCount++;
           special = {
           id: 57,
           imageId: 57,
-          story: `Hello human. The kingdom of the merfolk have watched your journeys. We know what you seek lies at ${alienCoords[1].join("-")} in the ${last[qaudrant[1] + qaudrant[0]]} fiefdon. Good luck.`
+          story: `Hello human. The kingdom of the merfolk have watched your journeys. We know what you seek lies at ${alienCoords[1].join("-")} in the ${last[qaudrant[1] + qaudrant[0]]} fiefdom. Good luck.`
         }
+        console.log("Merfolk", [qaudrant, [xIndex, yIndex]])
       }
       const biome = getBiome(elValue);
       const tree = getTree(biome, elValue, dataTrees[yIndex][xIndex]);
@@ -430,6 +430,14 @@ function getTree (biome, elValue, treeValue) {
     };
     return tree;
   }
+}
+
+function setVictory () {
+  svg.classList.add("stars");
+  setTimeout(() => {
+    document.querySelector("#svg-wrap").innerHTML = `<img style="width:100%" src="${images[59]}">`
+  }, 3000);
+
 }
 
 let start = false;
@@ -480,7 +488,7 @@ function render () {
     }
     personNode = generateStringHtml(locData.person.data, locData.person.profession, images);
   }
-  if (string === '') string += `Location ${last[qaudrant[1] + qaudrant[0]]} fiefdom ${player.join("-")}. `; //
+  if (string === '') string += `Location ${last[qaudrant[1] + qaudrant[0]]}(${qaudrant.join("-")}) fiefdom ${player.join("-")}. `; //
 
   storyNode.textContent = string;
   if (locData?.person?.profession === "lord" && apprenticeIndex >= 24) {

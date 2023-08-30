@@ -4,7 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Of All Trades</title>
-    <script type="module" crossorigin src="/of-all-trades/assets/index-bdb49064.js"></script>
+    <script type="module" crossorigin src="/of-all-trades/assets/index-9ad62c15.js"></script>
   </head>
   <body>
     <style>
@@ -60,21 +60,28 @@
           opacity: 0;
         }
       }
+      #wrap {
+        max-width: 350px; 
+        margin: 0 auto; 
+        position: relative;
+      }
     </style>
-    <div style="max-width: 350px; margin: 0 auto; position: relative;">
-      <svg width="700" height="275" viewBox="0 0 700 350" style="width:100%; max-width:350px; margin: 0 auto" xmlns="http://www.w3.org/2000/svg">
-        <g id="game"></g>
-        <g id="ui">
-          <rect data-d="nw" width="233" height="124" x="0" y="0" />
-          <rect data-d="n" width="233" height="124" x="233" y="0" />
-          <rect data-d="ne" width="233" height="124" x="466" y="0" />
-          <rect data-d="w" width="350" height="124" x="0" y="124" />
-          <rect data-d="e" width="350" height="124" x="350" y="124" />
-          <rect data-d="sw" width="233" height="124" x="0" y="248" />
-          <rect data-d="s" width="233" height="124" x="233" y="248" />
-          <rect data-d="se" width="233" height="124" x="466" y="248" />
-        </g>
-      </svg>
+    <div id="wrap">
+      <div id="svg-wrap">
+        <svg width="700" height="275" viewBox="0 0 700 350" style="width:100%; max-width:350px; margin: 0 auto" xmlns="http://www.w3.org/2000/svg">
+          <g id="game"></g>
+          <g id="ui">
+            <rect data-d="nw" width="233" height="124" x="0" y="0" />
+            <rect data-d="n" width="233" height="124" x="233" y="0" />
+            <rect data-d="ne" width="233" height="124" x="466" y="0" />
+            <rect data-d="w" width="350" height="124" x="0" y="124" />
+            <rect data-d="e" width="350" height="124" x="350" y="124" />
+            <rect data-d="sw" width="233" height="124" x="0" y="248" />
+            <rect data-d="s" width="233" height="124" x="233" y="248" />
+            <rect data-d="se" width="233" height="124" x="466" y="248" />
+          </g>
+        </svg>
+      </div>
       <div style="overflow-y: auto;overflow-x: hidden;">
         <div id="story" class="border">Loading...
         </div>
