@@ -19,6 +19,7 @@ let apprenticeIndex = 0;
 const apprenticesArr = professions.flat();
 let alienCoords;
 let merfolkCount = 0;
+let lordPlaced = false;
 
 for (let appIndex = 0; appIndex < apprenticesArr.length; appIndex++) {
   const liNode = document.createElement("li");
@@ -55,12 +56,16 @@ const keys = {
 document.querySelector("#ui").addEventListener('click', (e)=>{if (keys[e.target.dataset.d]) keys[e.target.dataset.d]()}, true)
 
 const getData = () => qauds[qaudrant[1]]?.[qaudrant[0]]?.data;
+const getQaudName = () => last[qaudrant[1]*5 + qaudrant[0]];
 
 //TODO DRY UP!
 async function movePlayer (x, y) {
   const data = getData();
   const biomePlacementArr = ["forest", "plains"];
-  if (apprenticeIndex < 17) biomePlacementArr.push('water');
+  if (apprenticeIndex > 13) biomePlacementArr.push('water');
+  if (apprenticeIndex > 7) biomePlacementArr.push('mountain');
+  if (apprenticeIndex > 20) biomePlacementArr.push('snow');
+  console.log("Allowed Biomes", biomePlacementArr); // TODO remove
   const newPlayer = [... player];
   newPlayer[1]+=y;
   newPlayer[0]+=x;
@@ -111,18 +116,18 @@ async function movePlayer (x, y) {
     };
     if (y !== 0) {
       qaudrant[1] = qaudrant[1]+y;
-      if (newPlayer[1] >= 199) {
-        player[1] = 3;
+      if (newPlayer[1] >= 198) {
+        player[1] = 2;
       } else {
-        player[1] = 196;
+        player[1] = 198;
       }
     }
     if (x !== 0) {
       qaudrant[0] = qaudrant[0]+x;
-      if (newPlayer[0] >= 199) {
-        player[0] = 3;
+      if (newPlayer[0] >= 198) {
+        player[0] = 2;
       } else {
-        player[0] = 196;
+        player[0] = 198;
       }
     }
     const nextQuad = qauds[qaudrant[1]]?.[qaudrant[0]];
@@ -151,12 +156,17 @@ async function renderInitial () {
   dataTrees = await noise.getQaud(200*qaudrant[0], 200*qaudrant[1]);
   const tileData = await noise.getQaud(200*qaudrant[0], 200*qaudrant[1]);
   qauds[qaudrant[1]][qaudrant[0]] = {
-    name: last[qaudrant[1] + qaudrant[0]],
+    name: getQaudName(),
     locs: [],
     data: tileData,
   }
   await defineTile();
-  const updatedCoords = await findNearest(player[0], player[1], ["forest", "plains"]);
+  const availableBiomes = ["forest", "plains"];
+  if (apprenticeIndex > 13) availableBiomes.push('water');
+  if (apprenticeIndex > 7) availableBiomes.push('mountain');
+  if (apprenticeIndex > 20) availableBiomes.push('snow');
+  console.log("Allowed Biomes", availableBiomes); // TODO remove
+  const updatedCoords = await findNearest(player[0], player[1], availableBiomes);
   player[0] = updatedCoords[0];
   player[1] = updatedCoords[1];
   await populateEntities();
@@ -186,11 +196,10 @@ function check (arr, index, count, x, y, data, biomes) {
         const updatedY = y+(arr[index][0])*count;
         const updatedX = x+(arr[index][1])*count;
         const tileData = data[updatedY] ? data[updatedY][updatedX] : undefined;
-    
         if (typeof tileData !== undefined && biomes?.includes(tileData?.biome)){ 
           resolve([updatedX, updatedY]);
         } else {
-          resolve(undefined);
+          resolve(false);
         }
     }
   )
@@ -198,7 +207,7 @@ function check (arr, index, count, x, y, data, biomes) {
 
 function createQaudrants () {
   let cityCount = 0; // max 2
-  let townCount = 0; // max 5
+  let townCount = 0; // max 10
 
   const qaudrants = [];
   for (let y = 0; y < 5; y++) {
@@ -206,24 +215,24 @@ function createQaudrants () {
     for (let x = 0; x < 5; x++) {
       qaudrants[y].push([]);
       const rand = Math.random();
-      if (cityCount < 1 && y > 1 && rand > 0.95) {
+      if (cityCount < 1 && y > 1 && rand > 0.4) {
         // place city
         city = [x, y];
         qaudrants[y][x].push(5);
         cityCount++;
       }
-      if (townCount < 5 && rand > 0.7) {
+      if (townCount < 11 && rand > 0.7) {
         // place town
         qaudrants[y][x].push(4);
         townCount++;
       }
       // place Village
-      if (Math.random() > 0.5) qaudrants[y][x].push(3);
+      if (Math.random() > 0.6) qaudrants[y][x].push(3);
       for (let structures = 0; structures < 10; structures++) {
         // place Farm
-        if (Math.random() > 0.7) qaudrants[y][x].push(2);
+        if (Math.random() > 0.6) qaudrants[y][x].push(2);
         // place homestead
-        if (Math.random() > 0.6) qaudrants[y][x].push(1);
+        if (Math.random() > 0.5) qaudrants[y][x].push(1);
       }
     }
   }
@@ -263,39 +272,56 @@ async function populateEntities () {
     let y = getRandomIntInclusive(0, 199);
     let x = getRandomIntInclusive(0, 199);
     const center = await getPlacement(id, x, y);
+    
     // Place structures
-    for (let structIndex = 0; structIndex < 6 - id; structIndex++) {
+    for (let structIndex = 0; structIndex < id; structIndex++) {
       let targetX = center[0];
       let targetY = center[1];
-      targetX = targetX + (structIndex * getRandomIntInclusive(-2, 2));
-      targetY = targetY + (structIndex * getRandomIntInclusive(-2, 2));
+      targetX = targetX + (structIndex * getRandomIntInclusive(-3, 3));
+      targetY = targetY + (structIndex * getRandomIntInclusive(-3, 3));
       const target = await getPlacement(id, targetY, targetX);
       qauds[qaudrant[1]][qaudrant[0]].locs.push([target[0], target[1]]);
       if (data[target[1]]?.[target[0]]) data[target[1]][target[0]].structure = {
         type: types[id - 1],
-        imageId: getRandomIntInclusive(0, id-1) + 2
+        imageId: structIndex+3
       }
 
       // place characters around structures
-      for (let charIndex = 0; charIndex < getRandomIntInclusive(1,1+id); charIndex++) {
-        let charTargetX = targetX + getRandomIntInclusive(-2, 2);
-        let charTargetY = targetY + getRandomIntInclusive(-2, 2);
-        if (charTargetX === targetX) charTargetX += 1;
-        if (charTargetY === targetY) charTargetY += 1;
-        charTargetX = charTargetX;
-        charTargetY = charTargetY;
+      const profs = professions[id-1];
+      for (let charIndex = 0; charIndex < profs.length; charIndex++) {
+        let charTargetX = target[0] + getRandomIntInclusive(-4, 4);
+        let charTargetY = target[1] + getRandomIntInclusive(-4, 4);
+        if (charTargetX === target[0]) charTargetX += 1;
+        if (charTargetY === target[1]) charTargetY += 1;
         const charTarget = await getPlacement(id, charTargetY, charTargetX);
         const charData = await createCharacter();
-        const profs = professions[id-1];
-        let profession = profs[Math.floor(Math.random() * profs.length)]
+
+        let profession = profs[charIndex];
         if (charData.age < 20) profession = profession;
         if (charData.age < 10) profession = "Child";
         if (charData.age < 4) profession = "Infant";
+        if (profession === "Lord" && lordPlaced === true) profession = "Jester";
+        if (id === 5 && lordPlaced === false && profession === "Lord") {
+          lordPlaced = true;
+        }
         if (data[charTarget[1]]?.[charTarget[0]]) data[charTarget[1]][charTarget[0]].person = {
           data: charData,
           imageId: charData.imageId,
           profession
         }
+
+
+        if (id === 5 && lordPlaced === false && data[charTarget[1]]?.[charTarget[0]]) {
+          const lordData = await createCharacter();
+          data[charTarget[1]][charTarget[0]].person = {
+            data: lordData,
+            imageId: lordData.imageId,
+            profession: "Lord"
+          }
+          lordPlaced = true
+        }
+
+
         if (id === 1 || id === 2 && Math.random() > 0.3) {
           const num = getRandomIntInclusive(0, 6);
           const randNumY = getRandomIntInclusive(-1, 1);
@@ -386,7 +412,7 @@ function createEntity (elValue, yIndex, xIndex) {
           special = {
           id: 57,
           imageId: 57,
-          story: `Hello human. The kingdom of the merfolk have watched your journeys. We know what you seek lies at ${alienCoords[1].join("-")} in the ${last[qaudrant[1] + qaudrant[0]]} fiefdom. Good luck.`
+          story: `Hello human. The kingdom of the merfolk have watched your journeys. We know what you seek lies at ${alienCoords[1].join("-")} in the ${getQaudName()} fiefdom. Good luck.`
         }
       }
       const biome = getBiome(elValue);
@@ -438,7 +464,7 @@ function render () {
   storyNode.innerHTML = '';
 
   if (!start) {
-    string += "You set out on your journey to apprentice your way to the top! Start by finding a Peddler to apprentice under then a hunter, and so on.";
+    string += "You set out on your journey to apprentice your way to the top! Start by finding a Peddler to apprentice under then a hunter, and so on. Click on areas of the image to move in different directions.";
     start = true;
   }
 
@@ -473,14 +499,14 @@ function render () {
     }
 
     if (locData.person.isWander) {
-      if (Math.random() > 0.7) string += `They tell you of the largest city in the area. They say it's located in the fiefdom of ${last[city[1] + city[0]]}. `;
+      if (Math.random() > 0.7) string += `They tell you of the largest city in the area. They say it's located in the fiefdom of ${last[city[1]*5 + city[0]]}. `;
       string += `The ${locData.person.profession} shares the location of a settlment in this fiefdom: `;
       const settlements = qauds[qaudrant[1]]?.[qaudrant[0]].locs;
-      string += `${settlements[Math.floor(Math.random()*settlements.length)].join("-")}`
+      if (settlements) string += `${settlements[Math.floor(Math.random()*settlements.length)].join("-")}`
     }
     personNode = generateStringHtml(locData.person.data, locData.person.profession, images);
   }
-  if (string === '') string += `Location ${last[qaudrant[1] + qaudrant[0]]}(${qaudrant.join("-")}) fiefdom ${player.join("-")}. `; //
+  if (string === '') string += `Location ${getQaudName()}(${qaudrant.join("-")}) fiefdom ${player.join("-")}. `; //
 
   storyNode.textContent = string;
   if (locData?.person?.profession === "lord" && apprenticeIndex >= 24) {
@@ -536,8 +562,8 @@ function addElement (points, id, biome, coordinates, pos) {
 
   let diff = data[player[1]][player[0]].elevation - tileData.elevation;
   if (tileData.biome === 'water') diff = diff*0.5;
-  if (tileData.biome === 'plains') diff = diff*2;
-  if (tileData.biome === 'forest') diff = diff*3;
+  if (tileData.biome === 'plains') diff = diff*2.5;
+  if (tileData.biome === 'forest') diff = diff*3.5;
   if (tileData.biome === 'mountain') diff = diff*6;
   if (tileData.biome === 'snow') diff = diff*8;
   gElm.setAttribute("transform", `translate(0, ${diff})`);

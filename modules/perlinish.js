@@ -17,7 +17,14 @@ export const perlinish = (canvasNode)=>{
             svg.appendChild(newElement);
             i++;
         }
-
+            // ////// For Debugging
+            // let circle = document.createElementNS("http://www.w3.org/2000/svg", 'circle');
+            // circle.setAttribute("fill","#000");
+            // circle.setAttribute("cx",500);
+            // circle.setAttribute("cy",500);
+            // circle.setAttribute("r",5);
+            // svg.appendChild(circle);
+            // /////
         await createImage();
 
         const features = document.querySelectorAll(".feature")
