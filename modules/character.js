@@ -13,28 +13,11 @@ export const professions = [
     "Shepherd",
     "Farmer"],
     // Village
-    ["miner",
-    "Tanner",
-    "Ropemaker",
-    "Brewer",
-    "Explorer",
-    "Healer"],
+    ['Healer', 'Explorer', 'Brewer', 'Ropemaker', 'Tanner', 'miner'],
     // Town
-    ["Fisherman",
-    "Cook",
-    "Shipwright",
-    "Merchant",
-    "Sailor",
-    "Blacksmith",
-    "Carpenter",
-    "Cartographer"],
+    ['Cartographer', 'Carpenter', 'Blacksmith', 'Sailor', 'Merchant', 'Shipwright', 'Cook', 'Fisherman'],
     // City
-    ["Lord",
-    "Tailor",
-    "Confectioner",
-    "Leatherworker",
-    "Banker",
-    "Weaver"],
+    ['Weaver', 'Banker', 'Leatherworker', 'Confectioner', 'Tailor', 'Lord'],
 ];
 
     // // City

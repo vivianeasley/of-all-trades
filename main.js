@@ -13,10 +13,12 @@ const svg = document.querySelector("#game");
 const qaudrant = [2, 2] // x, y
 const player = [100, 100]; // x, y
 let city; // x, y
+const settlementFiefdoms = []
 const emojiIcons = ['🧕','🌲','🌳', '🛖','🏚️','⛪', '🏛️', '🏯', '🏰', '👶', '🧒', '🧓', '🧑‍🦱', '🧑‍🦰', '🧑‍🦳', '🧑', '👵', '👩‍🦱', '👩‍🦰', '👩‍🦳', '👱‍♀️', '👴', '👨‍🦱', '👨‍🦰', '👨‍🦳', '🧔', '🐓', '🐖', '🐂', '🐏','🐕','🐐','🐎','🦌', '🦉','🐀', '🦇','🐇','🐕','🪨', '🪵','⛲','🌳','📜','✨','🗝️','🕯️','🌈','🌺','🍄','🐚','💀','💎','🔔','🔮','🗿','🍋','🧜‍♂️','🛸','🏆']
 const images = [];
 let apprenticeIndex = 0;
 const apprenticesArr = professions.flat();
+
 let alienCoords;
 let merfolkCount = 0;
 let lordPlaced = false;
@@ -56,16 +58,19 @@ const keys = {
 document.querySelector("#ui").addEventListener('click', (e)=>{if (keys[e.target.dataset.d]) keys[e.target.dataset.d]()}, true)
 
 const getData = () => qauds[qaudrant[1]]?.[qaudrant[0]]?.data;
-const getQaudName = () => last[qaudrant[1]*5 + qaudrant[0]];
+function getQaudName (x, y) {
+  if (x && y) return last[y*5 + x];
+  return last[qaudrant[1]*5 + qaudrant[0]];
+};
 
 //TODO DRY UP!
 async function movePlayer (x, y) {
   const data = getData();
   const biomePlacementArr = ["forest", "plains"];
-  if (apprenticeIndex > 13) biomePlacementArr.push('water');
-  if (apprenticeIndex > 7) biomePlacementArr.push('mountain');
-  if (apprenticeIndex > 20) biomePlacementArr.push('snow');
-  console.log("Allowed Biomes", biomePlacementArr); // TODO remove
+  if (apprenticeIndex > 16) biomePlacementArr.push('water');
+  if (apprenticeIndex > 8) biomePlacementArr.push('mountain');
+  if (apprenticeIndex > 24) biomePlacementArr.push('snow');
+  // console.log("Allowed Biomes", biomePlacementArr); // TODO remove
   const newPlayer = [... player];
   newPlayer[1]+=y;
   newPlayer[0]+=x;
@@ -162,10 +167,10 @@ async function renderInitial () {
   }
   await defineTile();
   const availableBiomes = ["forest", "plains"];
-  if (apprenticeIndex > 13) availableBiomes.push('water');
-  if (apprenticeIndex > 7) availableBiomes.push('mountain');
-  if (apprenticeIndex > 20) availableBiomes.push('snow');
-  console.log("Allowed Biomes", availableBiomes); // TODO remove
+  if (apprenticeIndex > 16) availableBiomes.push('water');
+  if (apprenticeIndex > 8) availableBiomes.push('mountain');
+  if (apprenticeIndex > 24) availableBiomes.push('snow');
+  // console.log("Allowed Biomes", availableBiomes); // TODO remove
   const updatedCoords = await findNearest(player[0], player[1], availableBiomes);
   player[0] = updatedCoords[0];
   player[1] = updatedCoords[1];
@@ -218,11 +223,13 @@ function createQaudrants () {
       if (cityCount < 1 && y > 1 && rand > 0.4) {
         // place city
         city = [x, y];
+        settlementFiefdoms.push(`They tell you there is a city in the ${getQaudName(x, y)} (${x}-${y}) fiefdom. `);
         qaudrants[y][x].push(5);
         cityCount++;
       }
       if (townCount < 11 && rand > 0.7) {
         // place town
+        settlementFiefdoms.push(`They tell you there is a town in the ${getQaudName(x, y)} (${x}-${y}) fiefdom. `);
         qaudrants[y][x].push(4);
         townCount++;
       }
@@ -285,6 +292,7 @@ async function populateEntities () {
         type: types[id - 1],
         imageId: structIndex+3
       }
+      console.log(types[id - 1], targetX, targetY, qaudrant)
 
       // place characters around structures
       const profs = professions[id-1];
@@ -298,29 +306,16 @@ async function populateEntities () {
 
         let profession = profs[charIndex];
         if (charData.age < 20) profession = profession;
-        if (charData.age < 10) profession = "Child";
-        if (charData.age < 4) profession = "Infant";
-        if (profession === "Lord" && lordPlaced === true) profession = "Jester";
+        if (charData.age < 10 && profession !== "Lord") profession = "Child";
+        if (charData.age < 4 && profession !== "Lord") profession = "Infant";
         if (id === 5 && lordPlaced === false && profession === "Lord") {
           lordPlaced = true;
-        }
+        } else if (profession === "Lord" && lordPlaced === true) {profession = "Jester"}
         if (data[charTarget[1]]?.[charTarget[0]]) data[charTarget[1]][charTarget[0]].person = {
           data: charData,
           imageId: charData.imageId,
           profession
         }
-
-
-        if (id === 5 && lordPlaced === false && data[charTarget[1]]?.[charTarget[0]]) {
-          const lordData = await createCharacter();
-          data[charTarget[1]][charTarget[0]].person = {
-            data: lordData,
-            imageId: lordData.imageId,
-            profession: "Lord"
-          }
-          lordPlaced = true
-        }
-
 
         if (id === 1 || id === 2 && Math.random() > 0.3) {
           const num = getRandomIntInclusive(0, 6);
@@ -357,7 +352,7 @@ async function populateEntities () {
       data[randoTarget[1]][randoTarget[0]].person = {
         data: randoData,
         imageId: randoData.imageId,
-        profession: randoProf,
+        profession: randoProf === "Lord" ? "Jester" : randoProf,
         isWander: true,
       }
 
@@ -399,21 +394,23 @@ async function getPlacement (num, y, x) {
 function createEntity (elValue, yIndex, xIndex) {
   return new Promise((resolve)=>{
       let special;
-      if (elValue >= 214 && !alienCoords) {
+      if (elValue >= 210 && !alienCoords && xIndex > 3 && yIndex > 3) {
           alienCoords = [qaudrant, [xIndex, yIndex]]
           special = {
           id: 58,
           imageId: 58,
           story: `Hello human. I admire your desire to understand all things. I have an offer for you. Travel with me and I will teach you all you could ever desire to know.`
         }
+        console.log("Alien", yIndex, xIndex, "qaud", qaudrant)
       }
-      if (elValue <= 7 && alienCoords && merfolkCount < 5) {
+      if (elValue <= 16 && alienCoords && merfolkCount < 1) {
           merfolkCount++;
           special = {
           id: 57,
           imageId: 57,
           story: `Hello human. The kingdom of the merfolk have watched your journeys. We know what you seek lies at ${alienCoords[1].join("-")} in the ${getQaudName()} fiefdom. Good luck.`
         }
+        console.log("merfolk", yIndex, xIndex, "qaud", qaudrant)
       }
       const biome = getBiome(elValue);
       const tree = getTree(biome, elValue, dataTrees[yIndex][xIndex]);
@@ -499,8 +496,10 @@ function render () {
     }
 
     if (locData.person.isWander) {
-      if (Math.random() > 0.7) string += `They tell you of the largest city in the area. They say it's located in the fiefdom of ${last[city[1]*5 + city[0]]}. `;
-      string += `The ${locData.person.profession} shares the location of a settlment in this fiefdom: `;
+      if (Math.random() > 0.7) {
+        string += settlementFiefdoms[Math.floor(Math.random()*settlementFiefdoms.length)]
+      };
+      string += `The ${locData.person.profession} shares the location of a settlment in this fiefdom at: `;
       const settlements = qauds[qaudrant[1]]?.[qaudrant[0]].locs;
       if (settlements) string += `${settlements[Math.floor(Math.random()*settlements.length)].join("-")}`
     }
@@ -509,7 +508,7 @@ function render () {
   if (string === '') string += `Location ${getQaudName()}(${qaudrant.join("-")}) fiefdom ${player.join("-")}. `; //
 
   storyNode.textContent = string;
-  if (locData?.person?.profession === "lord" && apprenticeIndex >= 24) {
+  if (locData?.person?.profession === "Lord" && apprenticeIndex >= 24) {
     storyNode.textContent = "The lord offer's you your final apprentiship. You have learned all that this great land has to offer. After years in service to the lord as their most trusted advisor you retire feeling oddly empty inside. Truly there must be more to know...";
     setVictory();
   }
