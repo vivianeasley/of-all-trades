@@ -1,3 +1,5 @@
+![Of All Trades gameplay screenshot.]([https://myoctocat.com/assets/images/base-octocat.svg](https://vivianeasley.github.io/of-all-trades/screenshot.png))
+
 # Play the game
 [Of All Trades](https://vivianeasley.github.io/of-all-trades/)
 
