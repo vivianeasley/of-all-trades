@@ -1,7 +1,7 @@
 import {getRandomIntInclusive} from "./character"
 export const perlinish = (canvasNode)=>{
     const PE = {};
-    const ctx = canvasNode.getContext("2d", { willReadFrequently: true });
+    const ctx = canvasNode.getContext("2d");
     const svg = document.querySelector("#perlin-svg");
     PE.generate = async ()=>{
         let i = 0;
@@ -33,7 +33,7 @@ export const perlinish = (canvasNode)=>{
             
         }
     }
-    //410 607
+
     PE.getQaud = async (x, y)=>{
         let xCount = 0;
         let yCount = 0;

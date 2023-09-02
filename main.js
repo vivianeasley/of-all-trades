@@ -35,6 +35,7 @@ for (let appIndex = 0; appIndex < apprenticesArr.length; appIndex++) {
 }
 
 const qauds = createQaudrants();
+console.log(qauds)
 
 const canvasNode = getNode('#perlin');
 const noise = perlinish(canvasNode);
@@ -147,7 +148,8 @@ async function movePlayer (x, y) {
 
     const newMapTile = getNode(`#m${qaudrant.join("-")}`);
     setAtt(newMapTile, 'style', "fill: red");
-    if (!qaudrant.name) {
+
+    if (!qauds[qaudrant[1]]?.[qaudrant[0]].name) {
       renderInitial();
     } else {
       const updatedCoords = await findNearest(player[0], player[1], biomePlacementArr);
@@ -169,7 +171,7 @@ setTimeout(async () => {
 }, 1000);
 
 async function renderInitial () {
-  structuresArr = [...qauds];
+  structuresArr = [...qauds[qaudrant[1]]?.[qaudrant[0]]];
   dataTrees = await noise.getQaud(200*qaudrant[0], 200*qaudrant[1]);
   const tileData = await noise.getQaud(200*qaudrant[0], 200*qaudrant[1]);
   qauds[qaudrant[1]][qaudrant[0]] = {
@@ -291,7 +293,6 @@ async function populateEntities () {
     let y = getRandomIntInclusive(0, 199);
     let x = getRandomIntInclusive(0, 199);
     const center = await getPlacement(id, x, y);
-    
     // Place structures
     for (let structIndex = 0; structIndex < id; structIndex++) {
       let targetX = center[0];
@@ -513,7 +514,7 @@ function render () {
       };
       string += `The ${locData.person.profession} shares the location of a settlment in this fiefdom at: `;
       const settlements = qauds[qaudrant[1]]?.[qaudrant[0]].locs;
-      if (settlements) string += `${settlements[Math.floor(Math.random()*settlements.length)].join("-")}`
+      string += `${settlements.length > 0 ? settlements[Math.floor(Math.random()*settlements.length)].join("-") : "No settlements in this fiefdom."}`;
     }
     personNode = generateStringHtml(locData.person.data, locData.person.profession, images);
   }
@@ -541,14 +542,14 @@ function render () {
       while (y-count > -1) {
         const coords = [(350-50*y)+count*100, 25*y-count];
         const pos = [ (y-count)+xCoorStart, (count)+yCoorStart];
-        addElement([`M ${coords[0]} ${coords[1]} l 50 25 l -50 25 l -50 -25 Z`, `M ${coords[0]-50} ${coords[1]+25} l 50 25 l 0 45 l -50 -25 Z`, `M ${coords[0]} ${coords[1]+50} l 50 -25 l 0 45 l -50 25 Z`], (pos[0]) + '-' + (pos[1]), 'stone', coords, pos);
+        addElement([`M ${coords[0]} ${coords[1]} l 50 25 l -50 25 l -50 -25 Z`, `M ${coords[0]-50} ${coords[1]+25} l 50 25 l 0 45 l -50 -25 Z`, `M ${coords[0]} ${coords[1]+50} l 50 -25 l 0 45 l -50 25 Z`], (pos[0]) + '-' + (pos[1]), coords, pos);
         count++;
       }    
     } else {
       while (count+(y-6) < 7) {
         const coords = [50+(50*(count+(y-6)))+count*50, 25*y-count];
         const pos = [(6-count)+xCoorStart, (count+(y-6))+yCoorStart];
-        addElement([`M ${coords[0]} ${coords[1]} l 50 25 l -50 25 l -50 -25 Z`, `M ${coords[0]-50} ${coords[1]+25} l 50 25 l 0 45 l -50 -25 Z`, `M ${coords[0]} ${coords[1]+50} l 50 -25 l 0 45 l -50 25 Z`], (pos[0]) + '-' + (pos[1]), 'stone', coords, pos);
+        addElement([`M ${coords[0]} ${coords[1]} l 50 25 l -50 25 l -50 -25 Z`, `M ${coords[0]-50} ${coords[1]+25} l 50 25 l 0 45 l -50 -25 Z`, `M ${coords[0]} ${coords[1]+50} l 50 -25 l 0 45 l -50 25 Z`], (pos[0]) + '-' + (pos[1]), coords, pos);
         count++;
       }
     }
@@ -556,7 +557,7 @@ function render () {
 
 }
 
-function addElement (points, id, biome, coordinates, pos) {
+function addElement (points, id, coordinates, pos) {
   const data = getData();
   let gElm = createElement('g');
   if (!data[pos[1]]?.[pos[0]]) return;
