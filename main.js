@@ -127,18 +127,20 @@ async function movePlayer (x, y) {
     const lastMapTile = getNode(`#m${qaudrant.join("-")}`);
     lastMapTile.removeAttribute('style')
     if (y !== 0) {
-      qaudrant[1] = qaudrant[1]+y;
       if (newPlayer[1] >= 198) {
+        qaudrant[1] = qaudrant[1]+1;
         player[1] = 2;
       } else {
+        qaudrant[1] = qaudrant[1]-1;
         player[1] = 198;
       }
     }
     if (x !== 0) {
-      qaudrant[0] = qaudrant[0]+x;
       if (newPlayer[0] >= 198) {
+        qaudrant[0] = qaudrant[0]-1;
         player[0] = 2;
       } else {
+        qaudrant[0] = qaudrant[0]+1;
         player[0] = 198;
       }
     }
@@ -233,13 +235,13 @@ function createQaudrants () {
       if (cityCount < 1 && y > 1 && rand > 0.4) {
         // place city
         city = [x, y];
-        settlementFiefdoms.push(`They tell you there is a city in the ${getQaudName(x, y)} (${x}-${y}) fiefdom. `);
+        settlementFiefdoms.push(`They tell you there is a city in the ${getQaudName(x, y)} fiefdom. `);
         qaudrants[y][x].push(5);
         cityCount++;
       }
       if (townCount < 11 && rand > 0.7) {
         // place town
-        settlementFiefdoms.push(`They tell you there is a town in the ${getQaudName(x, y)} (${x}-${y}) fiefdom. `);
+        settlementFiefdoms.push(`They tell you there is a town in the ${getQaudName(x, y)} fiefdom. `);
         qaudrants[y][x].push(4);
         townCount++;
       }
@@ -515,7 +517,7 @@ function render () {
     }
     personNode = generateStringHtml(locData.person.data, locData.person.profession, images);
   }
-  if (string === '') string += `Location ${getQaudName()}(${qaudrant.join("-")}) fiefdom ${player.join("-")}. `; //
+  if (string === '') string += `Location ${getQaudName()} fiefdom ${player.join("-")}. `; //
 
   storyNode.textContent = string;
   if (locData?.person?.profession === "Lord" && apprenticeIndex >= 24) {
@@ -638,7 +640,7 @@ function buildMap () {
       setAtt(fief, 'id', 'm'+mapXIndex+"-"+mapYIndex);
       if (mapXIndex === 2 && mapYIndex === 2) setAtt(fief, 'style', "fill: red");
       const title = createElement('title');
-      title.textContent = getQaudName(mapXIndex, mapYIndex);
+      title.textContent = last[mapYIndex*5 + mapXIndex];
       fief.appendChild(title);
       mapSvg.appendChild(fief);
     }
