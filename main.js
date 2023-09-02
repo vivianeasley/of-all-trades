@@ -8,10 +8,15 @@ import {last} from "./modules/names";
 const farmAnimalNoises = ["Chicken says cluck", "Pig says oink", "Cow says mooo", "Sheep says baaa", "Dog barks", "Goat gives a funny look and screams", "Horse whinnys"];
 const wildAnimalNoises = ["Deer says EEuurrruu","Owl says hooo","Rat says squeak","Bat says chirp","Rabbit runs off and hides in the underbrush", "Wild dog yaps and barks"];
 
-const storyNode = document.querySelector("#story");
-const svg = document.querySelector("#game");
+const setAtt = (node, key, value) => node.setAttribute(key, value);
+const getNode = (target) => document.querySelector(target);
+const getAllNodes = (targets) => document.querySelectorAll(targets);
+
+const storyNode = getNode("#story");
+const svg = getNode("#game");
+const mapSvg = getNode("#map");
 const qaudrant = [2, 2] // x, y
-const player = [100, 100]; // x, y
+const player = [10, 10]; // x, y
 let city; // x, y
 const settlementFiefdoms = []
 const emojiIcons = ['🧕','🌲','🌳', '🛖','🏚️','⛪', '🏛️', '🏯', '🏰', '👶', '🧒', '🧓', '🧑‍🦱', '🧑‍🦰', '🧑‍🦳', '🧑', '👵', '👩‍🦱', '👩‍🦰', '👩‍🦳', '👱‍♀️', '👴', '👨‍🦱', '👨‍🦰', '👨‍🦳', '🧔', '🐓', '🐖', '🐂', '🐏','🐕','🐐','🐎','🦌', '🦉','🐀', '🦇','🐇','🐕','🪨', '🪵','⛲','🌳','📜','✨','🗝️','🕯️','🌈','🌺','🍄','🐚','💀','💎','🔔','🔮','🗿','🍋','🧜‍♂️','🛸','🏆']
@@ -26,12 +31,12 @@ let lordPlaced = false;
 for (let appIndex = 0; appIndex < apprenticesArr.length; appIndex++) {
   const liNode = document.createElement("li");
   liNode.textContent = apprenticesArr[appIndex] + ' - not apprenticed';
-  document.querySelector("ol").appendChild(liNode);
+  getNode("ol").appendChild(liNode);
 }
 
 const qauds = createQaudrants();
 
-const canvasNode = document.querySelector('#perlin');
+const canvasNode = getNode('#perlin');
 const noise = perlinish(canvasNode);
 let structuresArr;
 let dataTrees;
@@ -55,7 +60,7 @@ const keys = {
   'ne': ()=>movePlayer(-1, 0), // NE
 }
 
-document.querySelector("#ui").addEventListener('click', (e)=>{if (keys[e.target.dataset.d]) keys[e.target.dataset.d]()}, true)
+getNode("#ui").addEventListener('click', (e)=>{if (keys[e.target.dataset.d]) keys[e.target.dataset.d]()}, true)
 
 const getData = () => qauds[qaudrant[1]]?.[qaudrant[0]]?.data;
 function getQaudName (x, y) {
@@ -104,7 +109,7 @@ async function movePlayer (x, y) {
 
   const person = data[player[1]]?.[player[0]]?.person
   if (apprenticesArr[apprenticeIndex] && person?.profession === apprenticesArr[apprenticeIndex]) {
-    const apprNodes = document.querySelectorAll("ol > li");
+    const apprNodes = getAllNodes("ol > li");
     const node = generateStringHtml(person.data, person.profession, images);
     apprNodes[apprenticeIndex].textContent = '';
     apprNodes[apprenticeIndex].appendChild(node);
@@ -119,6 +124,8 @@ async function movePlayer (x, y) {
       storyNode.textContent = "You've reached the edge of this land. You can travel no further in this direction.";
       return;
     };
+    const lastMapTile = getNode(`#m${qaudrant.join("-")}`);
+    lastMapTile.removeAttribute('style')
     if (y !== 0) {
       qaudrant[1] = qaudrant[1]+y;
       if (newPlayer[1] >= 198) {
@@ -135,8 +142,10 @@ async function movePlayer (x, y) {
         player[0] = 198;
       }
     }
-    const nextQuad = qauds[qaudrant[1]]?.[qaudrant[0]];
-    if (typeof nextQuad[0] === 'number') {
+
+    const newMapTile = getNode(`#m${qaudrant.join("-")}`);
+    setAtt(newMapTile, 'style', "fill: red");
+    if (!qaudrant.name) {
       renderInitial();
     } else {
       const updatedCoords = await findNearest(player[0], player[1], biomePlacementArr);
@@ -153,11 +162,12 @@ setTimeout(async () => {
   await noise.generate();
   await noise.generate();
   await generateImages();
+  buildMap();
   renderInitial();
 }, 1000);
 
 async function renderInitial () {
-  structuresArr = [...qauds[qaudrant[1]][qaudrant[0]]];
+  structuresArr = [...qauds];
   dataTrees = await noise.getQaud(200*qaudrant[0], 200*qaudrant[1]);
   const tileData = await noise.getQaud(200*qaudrant[0], 200*qaudrant[1]);
   qauds[qaudrant[1]][qaudrant[0]] = {
@@ -447,21 +457,21 @@ function getTree (biome, elValue, treeValue) {
 function setVictory () {
   svg.classList.add("stars");
   setTimeout(() => {
-    document.querySelector("#svg-wrap").innerHTML = `<img style="width:100%" src="${images[59]}">`
+    getNode("#svg-wrap").innerHTML = `<img style="width:100%" src="${images[59]}">`
   }, 3000);
 
 }
 
 let start = false;
 function render () {
-  const tileNodes = document.querySelectorAll('.tile');
+  const tileNodes = getAllNodes('.tile');
   const data = getData();
   const locData = data[player[1]][player[0]];
   let string = '';
   storyNode.innerHTML = '';
 
   if (!start) {
-    string += "You set out on your journey to apprentice your way to the top! Start by finding a Peddler to apprentice under then a hunter, and so on. Click on areas of the image to move in different directions.";
+    string += "You set out on your journey to apprentice your way to the top! Start by finding a Peddler to apprentice under then a hunter, and so on. Click on areas of the image to move in different directions. The map in the top left is of the 25 fiefdoms and you are in the red fiefdom.";
     start = true;
   }
 
@@ -551,8 +561,8 @@ function addElement (points, id, biome, coordinates, pos) {
   const tileData = data[pos[1]][pos[0]];
   for (let pointsIndex = 0; pointsIndex < points.length; pointsIndex++) {
     let elm = createElement('path', points[pointsIndex]);
-    elm.setAttribute("fill",tileData.color);
-    if (pointsIndex > 0) elm.setAttribute("opacity", 0.7)
+    setAtt(elm,"fill",tileData.color)
+    if (pointsIndex > 0) setAtt(elm, "opacity", 0.7)
     gElm.appendChild(elm);
   }
 
@@ -565,8 +575,8 @@ function addElement (points, id, biome, coordinates, pos) {
   if (tileData.biome === 'forest') diff = diff*3.5;
   if (tileData.biome === 'mountain') diff = diff*6;
   if (tileData.biome === 'snow') diff = diff*8;
-  gElm.setAttribute("transform", `translate(0, ${diff})`);
-  gElm.setAttribute("opacity", 1 - (diff*0.015))
+  setAtt(gElm, "transform", `translate(0, ${diff})`);
+  setAtt(gElm, "opacity", 1 - (diff*0.015))
 
   svg.appendChild(gElm);
 
@@ -594,26 +604,44 @@ function addElement (points, id, biome, coordinates, pos) {
     addImage(images[0], 'player');
   }
 
-  function createElement (type, pathPoints) {
-    let newElement = document.createElementNS("http://www.w3.org/2000/svg", type);
-    if (pathPoints && type === "path") {
-      newElement.setAttribute("d",pathPoints);
-    }
-    return newElement;
-  }
-
   function addImage (image, className) {
     const img = createElement('image');
-    img.setAttribute('href', image);
-    img.setAttribute('width', 100);
-    img.setAttribute('height', 100);
+    setAtt(img,'href', image);
+    setAtt(img,'width', 100);
+    setAtt(img,'height', 100);
     img.classList.add("tile");
     if (className) img.classList.add(className);
-    img.setAttribute('x', coordinates[0] - 50);
-    img.setAttribute('y', coordinates[1] - 70);
-    img.setAttribute("transform", `translate(0, ${diff})`)
-    img.setAttribute("opacity", 1 - (diff*0.01))
+    setAtt(img,'x', coordinates[0] - 50);
+    setAtt(img,'y', coordinates[1] - 70);
+    setAtt(img,"transform", `translate(0, ${diff})`)
+    setAtt(img,"opacity", 1 - (diff*0.01))
     svg.appendChild(img);
+  }
+}
+
+function createElement (type, pathPoints) {
+  let newElement = document.createElementNS("http://www.w3.org/2000/svg", type);
+  if (pathPoints && type === "path") {
+    setAtt(newElement,"d",pathPoints);
+  }
+  return newElement;
+}
+
+function buildMap () {
+  for (let mapYIndex = 0; mapYIndex < 5; mapYIndex++) {
+    for (let mapXIndex = 0; mapXIndex < 5; mapXIndex++) {
+      const fief = createElement('rect');
+      setAtt(fief, 'width', 10);
+      setAtt(fief, 'height', 10);
+      setAtt(fief, 'x', mapXIndex*10);
+      setAtt(fief, 'y', mapYIndex*10);
+      setAtt(fief, 'id', 'm'+mapXIndex+"-"+mapYIndex);
+      if (mapXIndex === 2 && mapYIndex === 2) setAtt(fief, 'style', "fill: red");
+      const title = createElement('title');
+      title.textContent = getQaudName(mapXIndex, mapYIndex);
+      fief.appendChild(title);
+      mapSvg.appendChild(fief);
+    }
   }
 }
 

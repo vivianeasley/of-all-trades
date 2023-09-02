@@ -32,10 +32,10 @@
       li > span {
         display: inline-block;
       }
-      rect {
+      [data-d] {
         opacity: 0;
       }
-      rect:hover {
+      [data-d]:hover {
         fill: #f1f1f1;
         opacity: 0.2;
         cursor: pointer;
@@ -60,9 +60,12 @@
       }
       #wrap {
         max-width: 350px; 
-        margin: 0 auto; 
+        margin: 37px auto; 
         position: relative;
         color: white;
+      }
+      #map > rect {
+        fill:#d8b57a;
       }
     </style>
     <div id="wrap">
@@ -80,6 +83,8 @@
             <rect data-d="se" width="233" height="124" x="466" y="248" />
           </g>
         </svg>
+        <svg id="map" width="50" height="50" viewBox="0 0 50 50" transform="rotate(-45)" style="position:absolute;left:0;" xmlns="http://www.w3.org/2000/svg">
+        </svg>
       </div>
       <div style="overflow-y: auto;overflow-x: hidden;">
         <div id="story" class="border">Loading...
@@ -90,7 +95,7 @@
         </div>
       </div>
     </div>
-    <span>v.0.3</span>
+    <span>v.0.4</span>
 
     <div id="character"></div>
     <canvas class="hidden" id="perlin"

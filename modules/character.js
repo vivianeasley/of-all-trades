@@ -59,7 +59,7 @@ export const professions = [
 
 const weighted = {
     // alignment:["Lawful Good","Neutral Good","Chaotic Good","Lawful Neutral","True Neutral"],
-    visualFeature:["Heterochromia","Goiter","Rickets","Missing fingers","Birthmark","Beautiful","Burn mark","Freckles","Short","Tall","Frail","Stout","Dimples","Scars","Unkempt","Callouses"]
+    visualFeature:["Extra finger","Heterochromia","Goiter","Rickets","Missing fingers","Birthmark","Beautiful","Burn mark","Freckles","Short","Tall","Frail","Stout","Dimples","Scars","Unkempt","Callouses"]
     };
     
 
@@ -70,7 +70,7 @@ const weighted = {
 
     // Normal
     const normal = {
-    motivation:["Survival","Love","Honor","Control","Save","Serve","Rule","Destroy","Grief","Betrayal","Fear","Escape","Revenge","Recover","Justice","Desire","Discover","Achieve","Hate","Ambition"],
+    // motivation:["Survival","Love","Honor","Control","Save","Serve","Rule","Destroy","Grief","Betrayal","Fear","Escape","Revenge","Recover","Justice","Desire","Discover","Achieve","Hate","Ambition"],
     // archetype:["The Hero","The Alchemist","The Lover","The Jester","The Everyperson","The Innocent","The Sage","The Explorer","The Caregiver","The Creator","The Ruler","The Rebel", "The Fool"],
     // statsBestToWorst:["Strength","Dexterity","Constitution","Wisdom","Intelligence","Charisma"],
     // sign:["Aquarius","Pisces","Aries","Taurus","Gemini","Cancer","Leo","Virgo","Libra","Scorpio","Saggittarius","Capricorn"],
