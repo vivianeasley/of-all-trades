@@ -16,7 +16,7 @@ const storyNode = getNode("#story");
 const svg = getNode("#game");
 const mapSvg = getNode("#map");
 const qaudrant = [2, 2] // x, y
-const player = [100, 100]; // x, y
+const player = [180, 180]; // x, y
 let city; // x, y
 const settlementFiefdoms = []
 const emojiIcons = ['🧕','🌲','🌳', '🛖','🏚️','⛪', '🏛️', '🏯', '🏰', '👶', '🧒', '🧓', '🧑‍🦱', '🧑‍🦰', '🧑‍🦳', '🧑', '👵', '👩‍🦱', '👩‍🦰', '👩‍🦳', '👱‍♀️', '👴', '👨‍🦱', '👨‍🦰', '👨‍🦳', '🧔', '🐓', '🐖', '🐂', '🐏','🐕','🐐','🐎','🦌', '🦉','🐀', '🦇','🐇','🐕','🪨', '🪵','⛲','🌳','📜','✨','🗝️','🕯️','🌈','🌺','🍄','🐚','💀','💎','🔔','🔮','🗿','🍋','🧜‍♂️','🛸','🏆']
@@ -127,7 +127,21 @@ async function movePlayer (x, y) {
     };
     const lastMapTile = getNode(`#m${qaudrant.join("-")}`);
     lastMapTile.removeAttribute('style')
-    if (y !== 0) {
+    if (y !== 0 && x !== 0) {
+      if (newPlayer[1] >= 198) {
+        qaudrant[1] = qaudrant[1]+1;
+        player[1] = 2;
+      } else if (newPlayer[0] >= 198) {
+        qaudrant[0] = qaudrant[0]+1;
+        player[0] = 2;
+      } else if (newPlayer[1] <= 2) {
+        qaudrant[1] = qaudrant[1]-1;
+        player[1] = 198;
+      } else {
+        qaudrant[0] = qaudrant[0]-1;
+        player[0] = 198;
+      }
+    } else if (y !== 0) {
       if (newPlayer[1] >= 198) {
         qaudrant[1] = qaudrant[1]+1;
         player[1] = 2;
@@ -135,13 +149,12 @@ async function movePlayer (x, y) {
         qaudrant[1] = qaudrant[1]-1;
         player[1] = 198;
       }
-    }
-    if (x !== 0) {
+    } else if (x !== 0) {
       if (newPlayer[0] >= 198) {
-        qaudrant[0] = qaudrant[0]-1;
+        qaudrant[0] = qaudrant[0]+1;
         player[0] = 2;
       } else {
-        qaudrant[0] = qaudrant[0]+1;
+        qaudrant[0] = qaudrant[0]-1;
         player[0] = 198;
       }
     }
@@ -518,7 +531,7 @@ function render () {
     }
     personNode = generateStringHtml(locData.person.data, locData.person.profession, images);
   }
-  if (string === '') string += `Location ${getQaudName()} fiefdom ${player.join("-")}. `; //
+  if (string === '') string += `Location ${getQaudName()} fiefdom (${qaudrant.join("-")}) ${player.join("-")}. `; //
 
   storyNode.textContent = string;
   if (locData?.person?.profession === "Lord" && apprenticeIndex >= 24) {
@@ -638,7 +651,7 @@ function buildMap () {
       setAtt(fief, 'height', 10);
       setAtt(fief, 'x', mapXIndex*10);
       setAtt(fief, 'y', mapYIndex*10);
-      setAtt(fief, 'id', 'm'+mapXIndex+"-"+mapYIndex);
+      setAtt(fief, 'id', 'm'+mapYIndex+"-"+ mapXIndex);
       if (mapXIndex === 2 && mapYIndex === 2) setAtt(fief, 'style', "fill: red");
       const title = createElement('title');
       title.textContent = last[mapYIndex*5 + mapXIndex];
