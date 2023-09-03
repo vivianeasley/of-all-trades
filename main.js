@@ -12,6 +12,8 @@ const types = ["Homestead", "Farm", "Village", "Town", "City"];
 const setAtt = (node, key, value) => node.setAttribute(key, value);
 const getNode = (target) => document.querySelector(target);
 const getAllNodes = (targets) => document.querySelectorAll(targets);
+const getRand = () => Math.random();
+const randFromArr = (arr) => arr[Math.floor(getRand()*arr.length)];
 
 const storyNode = getNode("#story");
 const svg = getNode("#game");
@@ -303,8 +305,8 @@ async function populateEntities () {
   // Race condition here
   for (let typeIndex = 0; typeIndex < structuresArr.length; typeIndex++) {
     const id = structuresArr[typeIndex];
-    let y = getRandomIntInclusive(0, 199);
-    let x = getRandomIntInclusive(0, 199);
+    let y = getRandomIntInclusive(10, 189);
+    let x = getRandomIntInclusive(10, 189);
     const center = await getPlacement(id, x, y);
     // Place structures
     for (let structIndex = 0; structIndex < id; structIndex++) {
@@ -312,7 +314,6 @@ async function populateEntities () {
       let targetY = center[1];
       targetX = targetX + (structIndex * getRandomIntInclusive(-3, 3));
       targetY = targetY + (structIndex * getRandomIntInclusive(-3, 3));
-      //TODO: If structure is at < 4 || > 195 move to those values
       const target = await getPlacement(id, targetY, targetX);
       const currentFief = qauds[qaudrant[1]][qaudrant[0]];
       currentFief.locs.push([target[0], target[1]]);
@@ -363,8 +364,8 @@ async function populateEntities () {
 
   // TODO: This causes a race condition if set too high. I think it wa sthe create character function
   for (let randoIndex = 0; randoIndex < 80; randoIndex++) {
-    let y = getRandomIntInclusive(0, 199);
-    let x = getRandomIntInclusive(0, 199);
+    let y = getRandomIntInclusive(10, 189);
+    let x = getRandomIntInclusive(10, 189);
 
     if (Math.random() > 0.3) {
       const randoTarget = await getPlacement(6, x, y);
@@ -377,7 +378,7 @@ async function populateEntities () {
     } else {
       const randoTarget = await getPlacement(7, x, y);
       const randoData = await createCharacter();
-      const randoProf = apprenticesArr[Math.floor(Math.random() * apprenticesArr.length)];
+      const randoProf = randFromArr(apprenticesArr);
       data[randoTarget[1]][randoTarget[0]].person = {
         data: randoData,
         imageId: randoData.imageId,
@@ -387,9 +388,9 @@ async function populateEntities () {
 
     }
   }
-  for (let specialIndex = 0; specialIndex < getRandomIntInclusive(2, 4); specialIndex++) {
-    let specialY = getRandomIntInclusive(0, 199);
-    let specialX = getRandomIntInclusive(0, 199);
+  for (let specialIndex = 0; specialIndex < 8; specialIndex++) {
+    let specialY = getRandomIntInclusive(10, 189);
+    let specialX = getRandomIntInclusive(10, 189);
     const specialTarget = await getPlacement(7, specialX, specialY);
     const specialNum = getRandomIntInclusive(0, 17);
     data[specialTarget[1]][specialTarget[0]].special = {
@@ -526,21 +527,20 @@ function render () {
 
     if (locData.person) {
       let levelTotals = 0;
-      const levels = professions.map((prof)=>(levelTotals += prof.length) - 1);
+      const levels = professions.map((prof)=>(levelTotals += prof.length));
       const settlements = qauds[qaudrant[1]]?.[qaudrant[0]].locs;
       const settlementIds = qauds[qaudrant[1]]?.[qaudrant[0]].locIds;
-      const randIndex = settlementIds.findIndex((num)=>{
-        console.log(apprenticeIndex, levels[num], levels[num-1])
+      const settlementIndices = settlementIds.map((num, i)=>{
         const bottom = levels[num - 1] ?? 0;
-        return apprenticeIndex+1 <= levels[num] && apprenticeIndex >= bottom
+        return apprenticeIndex < levels[num] && apprenticeIndex >= bottom ? i : -1;
       })
+      const randIndex = randFromArr(settlementIndices.filter((int)=> int >= 0));
       const typeId = settlementIds[randIndex];
       if (typeId !== undefined && settlements.length > 0 ) {
         string += `The ${locData.person.profession} shares the location of a *${types[typeId]}* in this fiefdom around ${settlements[randIndex].join("-")}. They say that the trades there are: ${professions[typeId].join(", ")}.`;
       } else {
-        string += "They tell you to look to another fiefdom for your next apprentiships."
+        string += `They tell you to look to another fiefdom for your next apprentiships. ${typeId === 4 ? 'Check the ' + getQaudName(city[0], city[1]) + 'fiefdom. ' : ''}`
       }
-      
     }
     personNode = generateStringHtml(locData.person.data, locData.person.profession, images);
   }
