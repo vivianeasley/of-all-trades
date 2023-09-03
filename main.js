@@ -7,6 +7,7 @@ import {last} from "./modules/names";
 
 const farmAnimalNoises = ["Chicken says cluck", "Pig says oink", "Cow says mooo", "Sheep says baaa", "Dog barks", "Goat gives a funny look and screams", "Horse whinnys"];
 const wildAnimalNoises = ["Deer says EEuurrruu","Owl says hooo","Rat says squeak","Bat says chirp","Rabbit runs off and hides in the underbrush", "Wild dog yaps and barks"];
+const types = ["Homestead", "Farm", "Village", "Town", "City"];
 
 const setAtt = (node, key, value) => node.setAttribute(key, value);
 const getNode = (target) => document.querySelector(target);
@@ -124,7 +125,7 @@ async function movePlayer (x, y) {
       storyNode.textContent = "You've reached the edge of this land. You can travel no further in this direction.";
       return;
     };
-    const lastMapTile = getNode(`#m${qaudrant.join("-")}`);
+    const lastMapTile = getNode(`#m${qaudrant[1]}-${qaudrant[0]}`);
     lastMapTile.removeAttribute('style')
     if (y !== 0 && x !== 0) {
       if (newPlayer[1] >= 198) {
@@ -158,7 +159,7 @@ async function movePlayer (x, y) {
       }
     }
 
-    const newMapTile = getNode(`#m${qaudrant.join("-")}`);
+    const newMapTile = getNode(`#m${qaudrant[1]}-${qaudrant[0]}`);
     setAtt(newMapTile, 'style', "fill: red");
 
     if (!qauds[qaudrant[1]]?.[qaudrant[0]].name) {
@@ -189,6 +190,7 @@ async function renderInitial () {
   qauds[qaudrant[1]][qaudrant[0]] = {
     name: getQaudName(),
     locs: [],
+    locIds: [],
     data: tileData,
   }
   await defineTile();
@@ -297,7 +299,6 @@ async function defineTile () {
 }
 
 async function populateEntities () {
-  const types = ["Homestead", "Farm", "Village", "Town", "City"];
   const data = getData();
   // Race condition here
   for (let typeIndex = 0; typeIndex < structuresArr.length; typeIndex++) {
@@ -311,8 +312,11 @@ async function populateEntities () {
       let targetY = center[1];
       targetX = targetX + (structIndex * getRandomIntInclusive(-3, 3));
       targetY = targetY + (structIndex * getRandomIntInclusive(-3, 3));
+      //TODO: If structure is at < 4 || > 195 move to those values
       const target = await getPlacement(id, targetY, targetX);
-      qauds[qaudrant[1]][qaudrant[0]].locs.push([target[0], target[1]]);
+      const currentFief = qauds[qaudrant[1]][qaudrant[0]];
+      currentFief.locs.push([target[0], target[1]]);
+      currentFief.locIds.push(id - 1);
       if (data[target[1]]?.[target[0]]) data[target[1]][target[0]].structure = {
         type: types[id - 1],
         imageId: structIndex+3
@@ -520,17 +524,25 @@ function render () {
       string += `You apprentice under ${locData.person.data.name}. `
     }
 
-    if (locData.person.isWander) {
-      if (Math.random() > 0.7) {
-        string += settlementFiefdoms[Math.floor(Math.random()*settlementFiefdoms.length)]
+    if (locData.person) {
+      if (Math.random() > 0.5) {
+        // string += settlementFiefdoms[Math.floor(Math.random()*settlementFiefdoms.length)]
+
       };
-      string += `The ${locData.person.profession} shares the location of a settlment in this fiefdom at: `;
       const settlements = qauds[qaudrant[1]]?.[qaudrant[0]].locs;
-      string += `${settlements.length > 0 ? settlements[Math.floor(Math.random()*settlements.length)].join("-") : "No settlements in this fiefdom."}`;
+      const randIndex = Math.floor(Math.random()*settlements.length);
+      const settlementNames = qauds[qaudrant[1]]?.[qaudrant[0]].locIds;
+      const typeId = settlementNames[randIndex];
+      if (settlements.length > 0 ) {
+        string += `The ${locData.person.profession} shares the location of a ${types[typeId]} in this fiefdom at ${settlements[randIndex].join("-")}. They say that the trades there are: ${professions[typeId].join(", ")}.`;
+      } else {
+        string += "No settlements in this fiefdom."
+      }
+      
     }
     personNode = generateStringHtml(locData.person.data, locData.person.profession, images);
   }
-  if (string === '') string += `Location ${getQaudName()} fiefdom (${qaudrant.join("-")}) ${player.join("-")}. `; //
+  if (string === '') string += `Location ${getQaudName()} fiefdom (${qaudrant.join("-")}) ${player.join("-")}. `;
 
   storyNode.textContent = string;
   if (locData?.person?.profession === "Lord" && apprenticeIndex >= 24) {
@@ -650,10 +662,10 @@ function buildMap () {
       setAtt(fief, 'height', 10);
       setAtt(fief, 'x', mapXIndex*10);
       setAtt(fief, 'y', mapYIndex*10);
-      setAtt(fief, 'id', 'm'+mapYIndex+"-"+ mapXIndex);
+      setAtt(fief, 'id', 'm'+mapXIndex+"-"+ mapYIndex);
       if (mapXIndex === 2 && mapYIndex === 2) setAtt(fief, 'style', "fill: red");
       const title = createElement('title');
-      title.textContent = last[mapYIndex*5 + mapXIndex];
+      title.textContent = last[mapXIndex*5 +mapYIndex];
       fief.appendChild(title);
       mapSvg.appendChild(fief);
     }
