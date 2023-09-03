@@ -16,7 +16,7 @@ const storyNode = getNode("#story");
 const svg = getNode("#game");
 const mapSvg = getNode("#map");
 const qaudrant = [2, 2] // x, y
-const player = [180, 180]; // x, y
+const player = [100, 100]; // x, y
 let city; // x, y
 const settlementFiefdoms = []
 const emojiIcons = ['🧕','🌲','🌳', '🛖','🏚️','⛪', '🏛️', '🏯', '🏰', '👶', '🧒', '🧓', '🧑‍🦱', '🧑‍🦰', '🧑‍🦳', '🧑', '👵', '👩‍🦱', '👩‍🦰', '👩‍🦳', '👱‍♀️', '👴', '👨‍🦱', '👨‍🦰', '👨‍🦳', '🧔', '🐓', '🐖', '🐂', '🐏','🐕','🐐','🐎','🦌', '🦉','🐀', '🦇','🐇','🐕','🪨', '🪵','⛲','🌳','📜','✨','🗝️','🕯️','🌈','🌺','🍄','🐚','💀','💎','🔔','🔮','🗿','🍋','🧜‍♂️','🛸','🏆']
@@ -35,7 +35,6 @@ for (let appIndex = 0; appIndex < apprenticesArr.length; appIndex++) {
 }
 
 const qauds = createQaudrants();
-console.log(qauds)
 
 const canvasNode = getNode('#perlin');
 const noise = perlinish(canvasNode);
@@ -420,7 +419,7 @@ async function getPlacement (num, y, x) {
 function createEntity (elValue, yIndex, xIndex) {
   return new Promise((resolve)=>{
       let special;
-      if (elValue >= 210 && !alienCoords && xIndex > 3 && yIndex > 3) {
+      if (elValue >= 210 && !alienCoords && xIndex > 3 && yIndex > 3 && xIndex < 198 && yIndex < 198) {
           alienCoords = [qaudrant, [xIndex, yIndex]]
           special = {
           id: 58,
@@ -429,7 +428,7 @@ function createEntity (elValue, yIndex, xIndex) {
         }
         console.log("Alien", yIndex, xIndex, "qaud", qaudrant)
       }
-      if (elValue <= 16 && alienCoords && merfolkCount < 1) {
+      if (elValue <= 16 && alienCoords && merfolkCount < 1 && xIndex > 3 && yIndex > 3 && xIndex < 198 && yIndex < 198) {
           merfolkCount++;
           special = {
           id: 57,
@@ -487,7 +486,7 @@ function render () {
   storyNode.innerHTML = '';
 
   if (!start) {
-    string += "You set out on your journey to apprentice your way to the top! Start by finding a Peddler to apprentice under then a hunter, and so on. Click on areas of the image to move in different directions. The map in the top left is of the 25 fiefdoms and you are in the red fiefdom.";
+    string += "HOW TO PLAY: Start by finding a Peddler to apprentice under then a hunter, and so on. Click on areas of the image to move in different directions. The map in the top left is of the 25 fiefdoms and you are in the red one. Specific trades people will be around different types of settlements. Homesteads include the first 3 trades, farms the next 3, villages the next 6, towns the next 8, and the city will have the rest.";
     start = true;
   }
 
