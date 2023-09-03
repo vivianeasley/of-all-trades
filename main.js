@@ -525,18 +525,20 @@ function render () {
     }
 
     if (locData.person) {
-      if (Math.random() > 0.5) {
-        // string += settlementFiefdoms[Math.floor(Math.random()*settlementFiefdoms.length)]
-
-      };
+      let levelTotals = 0;
+      const levels = professions.map((prof)=>(levelTotals += prof.length) - 1);
       const settlements = qauds[qaudrant[1]]?.[qaudrant[0]].locs;
-      const randIndex = Math.floor(Math.random()*settlements.length);
-      const settlementNames = qauds[qaudrant[1]]?.[qaudrant[0]].locIds;
-      const typeId = settlementNames[randIndex];
-      if (settlements.length > 0 ) {
-        string += `The ${locData.person.profession} shares the location of a ${types[typeId]} in this fiefdom at ${settlements[randIndex].join("-")}. They say that the trades there are: ${professions[typeId].join(", ")}.`;
+      const settlementIds = qauds[qaudrant[1]]?.[qaudrant[0]].locIds;
+      const randIndex = settlementIds.findIndex((num)=>{
+        console.log(apprenticeIndex, levels[num], levels[num-1])
+        const bottom = levels[num - 1] ?? 0;
+        return apprenticeIndex+1 <= levels[num] && apprenticeIndex >= bottom
+      })
+      const typeId = settlementIds[randIndex];
+      if (typeId !== undefined && settlements.length > 0 ) {
+        string += `The ${locData.person.profession} shares the location of a *${types[typeId]}* in this fiefdom around ${settlements[randIndex].join("-")}. They say that the trades there are: ${professions[typeId].join(", ")}.`;
       } else {
-        string += "No settlements in this fiefdom."
+        string += "They tell you to look to another fiefdom for your next apprentiships."
       }
       
     }
