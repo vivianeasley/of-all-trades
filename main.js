@@ -5,8 +5,8 @@ import {createCharacter, getRandomIntInclusive, professions, generateStringHtml}
 import {last} from "./modules/names";
 
 
-const farmAnimalNoises = ["Chicken says cluck", "Pig says oink", "Cow says mooo", "Sheep says baaa", "Dog barks", "Goat gives a funny look and screams", "Horse whinnys"];
-const wildAnimalNoises = ["Deer says EEuurrruu","Owl says hooo","Rat says squeak","Bat says chirp","Rabbit runs off and hides in the underbrush", "Wild dog yaps and barks"];
+const farmAnimalNoises = ["Chicken says “Cluck", "Pig says “Oink", "Cow says “Mooo", "Sheep says “Baaa", "Dog barks", "Goat gives a funny look and screams", "Horse whinnies"];
+const wildAnimalNoises = ["Deer says “EEuurrruu”","Owl says “Hooo”","Rat says “Squeak”","Bat says “Chirp”","Rabbit runs off and hides in the underbrush", "Wild dog yaps and barks"];
 const types = ["Homestead", "Farm", "Village", "Town", "City"];
 
 const setAtt = (node, key, value) => node.setAttribute(key, value);
@@ -93,17 +93,17 @@ async function movePlayer (x, y) {
 
   const biome = getBiome(data[newPlayer[1]]?.[newPlayer[0]]?.elevation);
   if (biome === "mountain" && apprenticeIndex < 8) {
-    storyNode.textContent = "You need to have apprenticed with a ropemaker to ascend mountains.";
+    storyNode.textContent = "You need to apprentice with a ropemaker to ascend mountains.";
     return;
   }
 
   if (biome === "water" && apprenticeIndex < 17) {
-    storyNode.textContent = "You need to have apprenticed with a shipwright to sail across the ocean.";
+    storyNode.textContent = "You need to apprentice with a shipwright to sail across the ocean.";
     return;
   }
 
   if (biome === "snow" && apprenticeIndex < 24) {
-    storyNode.textContent = "You need to have apprenticed with a tailor to travel in snowy peaks.";
+    storyNode.textContent = "You need to apprentice with a tailor to ascend snowy peaks.";
     return;
   }
 
@@ -214,7 +214,7 @@ async function findNearest (x, y, biomes) {
     let index = 0;
     let coordinates;
     const arr = [[-1, 1], [1, -1], [1, 1], [-1, -1], [0, 1], [-1, 0], [0, -1], [1, 0],];
-    while (!coordinates) {
+    while (!coordinates && count < 100) {
       if (!arr[index]) index = 0;
       coordinates = await check(arr, index, count, x, y, data, biomes);
       if (coordinates) {
@@ -223,6 +223,7 @@ async function findNearest (x, y, biomes) {
       count++;
       index++;
     }
+    return [10, 10];
 }
 
 function check (arr, index, count, x, y, data, biomes) {
@@ -438,7 +439,7 @@ function createEntity (elValue, yIndex, xIndex) {
           special = {
           id: 57,
           imageId: 57,
-          story: `Hello human. The kingdom of the merfolk have watched your journeys. We know what you seek lies at ${alienCoords[1].join("-")} in the ${getQaudName()} fiefdom. Good luck.`
+          story: `Hello human. The kingdom of the merfolk has watched your journey. We know what you seek lies at ${alienCoords[1].join("-")} in the ${getQaudName()} fiefdom. Good luck.`
         }
         console.log("merfolk", yIndex, xIndex, "qaud", qaudrant)
       }
@@ -491,7 +492,7 @@ function render () {
   storyNode.innerHTML = '';
 
   if (!start) {
-    string += "HOW TO PLAY: Start by finding a Peddler to apprentice under then a hunter, and so on. Click on areas of the image to move in different directions. The map in the top left is of the 25 fiefdoms and you are in the red one. Specific trades people will be around different types of settlements. Homesteads include the first 3 trades, farms the next 3, villages the next 6, towns the next 8, and the city will have the rest.";
+    string += "HOW TO PLAY: Start by finding a peddler to apprentice under, then a hunter, and so on. Click on areas of the image to move in different directions. The map in the top left shows the 25 fiefdoms you can explore, and the red square marks your current location. Specific trades people will be around different types of settlements. Homesteads include the first 3 trades, farms the next 3, villages the next 6, towns the next 8, and the city will have the rest.";
     start = true;
   }
 
@@ -516,7 +517,7 @@ function render () {
     if (locData.person.isWander) {
       meetString = 'Walking out along a small path'
     } else {
-      meetString = 'As you approach a settlment';
+      meetString = 'As you approach a settlement';
     }
 
     string += `${meetString}, you meet a ${locData.person.profession} named ${locData.person.data.name}. `;
@@ -548,7 +549,7 @@ function render () {
 
   storyNode.textContent = string;
   if (locData?.person?.profession === "Lord" && apprenticeIndex >= 24) {
-    storyNode.textContent = "The lord offer's you your final apprentiship. You have learned all that this great land has to offer. After years in service to the lord as their most trusted advisor you retire feeling oddly empty inside. Truly there must be more to know...";
+    storyNode.textContent = "The lord offers you your final apprenticeship. You have learned all that this great land has to offer. After years in service to the lord as their most trusted advisor, you retire feeling oddly empty inside. Truly, there must be more to know...";
     setVictory();
   }
 
