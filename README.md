@@ -18,3 +18,11 @@ For images I take UTF8 emoji and print them to a canvas I then go through pixel 
 
 Another interesting thing about the game is that the isometric game area is just an SVG because, why not.
 
+# TODO
+If I had more time I would:
+- Clean up the code quite a bit
+- Add a map of the fiefdom the player is currently in
+- Add music
+- Add more distinct features in the terrain
+- Fix the bug where on very rare occasions the game freezes when changing fiefdoms
+
