@@ -29,7 +29,7 @@ const apprenticesArr = professions.flat();
 
 let alienCoords;
 let merfolkCount = 0;
-let lordPlaced = false;
+let lordCount = 0;
 
 for (let appIndex = 0; appIndex < apprenticesArr.length; appIndex++) {
   const liNode = document.createElement("li");
@@ -214,7 +214,7 @@ async function findNearest (x, y, biomes) {
     let index = 0;
     let coordinates;
     const arr = [[-1, 1], [1, -1], [1, 1], [-1, -1], [0, 1], [-1, 0], [0, -1], [1, 0],];
-    while (!coordinates && count < 100) {
+    while (!coordinates && count < 200) {
       if (!arr[index]) index = 0;
       coordinates = await check(arr, index, count, x, y, data, biomes);
       if (coordinates) {
@@ -223,7 +223,7 @@ async function findNearest (x, y, biomes) {
       count++;
       index++;
     }
-    return [10, 10];
+    return [100, 100]; // TODO: should actually maybe call again with diff coords
 }
 
 function check (arr, index, count, x, y, data, biomes) {
@@ -232,7 +232,7 @@ function check (arr, index, count, x, y, data, biomes) {
         const updatedY = y+(arr[index][0])*count;
         const updatedX = x+(arr[index][1])*count;
         const tileData = data[updatedY] ? data[updatedY][updatedX] : undefined;
-        if (typeof tileData !== undefined && biomes?.includes(tileData?.biome)){ 
+        if (typeof tileData !== undefined && biomes?.includes(tileData?.biome) && updatedY < 195 && updatedY > 5 && updatedX < 195 && updatedX > 5){ 
           resolve([updatedX, updatedY]);
         } else {
           resolve(false);
@@ -308,6 +308,7 @@ async function populateEntities () {
     const id = structuresArr[typeIndex];
     let y = getRandomIntInclusive(10, 189);
     let x = getRandomIntInclusive(10, 189);
+    console.log(id)
     const center = await getPlacement(id, x, y);
     // Place structures
     for (let structIndex = 0; structIndex < id; structIndex++) {
@@ -339,9 +340,9 @@ async function populateEntities () {
         if (charData.age < 20) profession = profession;
         if (charData.age < 10 && profession !== "Lord") profession = "Child";
         if (charData.age < 4 && profession !== "Lord") profession = "Infant";
-        if (id === 5 && lordPlaced === false && profession === "Lord") {
-          lordPlaced = true;
-        } else if (profession === "Lord" && lordPlaced === true) {profession = "Jester"}
+        if (id === 5 && lordCount < 2 && profession === "Lord") {
+          lordCount++;
+        } else if (profession === "Lord" && lordCount >= 2) {profession = "Jester"}
         if (data[charTarget[1]]?.[charTarget[0]]) data[charTarget[1]][charTarget[0]].person = {
           data: charData,
           imageId: charData.imageId,
@@ -416,9 +417,10 @@ async function populateEntities () {
 }
 
 async function getPlacement (num, y, x) {
-  let type = num === 4 || num === 5 ? ["plains"] :  ["forest", "plains"];
-  if (num === 6) type = ["forest", "plains", "mountain", "water"];
-  if (num === 7) type = ["forest", "plains", "mountain", "snow"];
+  let type = ["forest", "plains"];
+  if (num > 3) type.push("mountain");
+  if (num === 6) type.push("water");
+  if (num === 7) type.push("snow");
   return await findNearest(x, y, type);
 }
 
@@ -548,7 +550,7 @@ function render () {
   if (string === '') string += `Location ${getQaudName()} fiefdom (${qaudrant.join("-")}) ${player.join("-")}. `;
 
   storyNode.textContent = string;
-  if (locData?.person?.profession === "Lord" && apprenticeIndex >= 24) {
+  if (locData?.person?.profession === "Lord" && apprenticeIndex >= 25) {
     storyNode.textContent = "The lord offers you your final apprenticeship. You have learned all that this great land has to offer. After years in service to the lord as their most trusted advisor, you retire feeling oddly empty inside. Truly, there must be more to know...";
     setVictory();
   }
